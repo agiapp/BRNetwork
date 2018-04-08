@@ -42,7 +42,7 @@ typedef void (^BRRequestBlock)(BRRequestStatus requestStatus, NSString *message,
 /// (封装层) 解析数据，把服务器返回数据转换想要的数据，通常解析body内数据
 - (id)formatResponseObject:(id)responseObject;
 
-// HTTP头
+/// HTTP头
 - (NSDictionary *)requestHeaderDictionary;
 
 @end

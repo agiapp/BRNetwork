@@ -8,6 +8,8 @@
 
 #import "BRBaseRequest.h"
 #import <YTKNetworkAgent.h>
+#import <NSString+YYAdd.h>
+#import <NSArray+YYAdd.h>
 
 // 私有定义,来自服务端定义
 #define kBRCodeStatus           @"code"
@@ -30,6 +32,10 @@ NSString *const BRAccessTokenExpiredNotifKey = @"BRAccessTokenExpiredNotifKey";
 NSString *const BRNotificationOfflineNotifKey = @"BRNotificationOfflineNotifKey";
 
 @implementation BRBaseRequest
+
+- (NSString *)baseUrl {
+    return @"http://10.8.3.48:7080/cas-app/";
+}
 
 #pragma mark - 请求地址
 - (NSString *)requestUrl {
@@ -64,7 +70,35 @@ NSString *const BRNotificationOfflineNotifKey = @"BRNotificationOfflineNotifKey"
 }
 
 - (NSDictionary *)requestHeaderFieldValueDictionary {
-    return [self requestHeaderDictionary];
+    // *.jsonRequest 的请求才会加密
+    BOOL needEncry = ([[self requestUrl] rangeOfString:kBRJsonRequest].location != NSNotFound) && [self needEncryFromService];
+    NSMutableDictionary *param = [[self requestHeaderDictionary] mutableCopy];
+    // 有Token时加密
+    NSString *token = [param objectForKey:kBRXAccessToken];
+    if (token.length > 8 && needEncry) {
+        NSString *salt = [token substringWithRange:NSMakeRange(4, 4)];
+        NSArray *body = @[[[self requestArgument] jsonStringEncoded], salt];
+        body = [body sortedArrayUsingSelector:@selector(compare:)];
+        NSString *signature = [[NSString stringWithFormat:@"%@%@", body[0], body[1]] md5String];
+        // 添加签名 signature
+        [param setObject:signature forKey:kBRXSignature];
+        return param;
+    }
+    return param;
+}
+
+// 配置需要加密的服务
+- (BOOL)needEncryFromService {
+    // 需要加密的service
+    NSArray *list = @[@"cas.personService",
+                      @"cas.familyService",
+                      @"cas.cardService",
+                      @"cas.healthRecordsService",
+                      @"cas.reportService",
+                      @"cas.registrationService",
+                      @"cas.queueService"];
+    NSString *serviceId = [[self requestHeaderDictionary] objectForKey:kBRXServiceId];
+    return [list containsObject:serviceId];
 }
 
 // HTTP头
@@ -158,11 +192,11 @@ NSString *const BRNotificationOfflineNotifKey = @"BRNotificationOfflineNotifKey"
 
 #pragma mark - 打印请求结果的详细信息
 - (void)printResponseData {
-    NSData *jsonData;
+    NSData *jsonData = nil;
     if (self.responseJSONObject) {
         jsonData = [NSJSONSerialization dataWithJSONObject:self.responseJSONObject options:NSJSONWritingPrettyPrinted error:nil];
     }
-    NSString *jsonString;
+    NSString *jsonString = nil;
     if (jsonData) {
         jsonString = [[NSString alloc] initWithData:jsonData encoding:NSUTF8StringEncoding];
     } else {
