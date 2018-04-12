@@ -51,6 +51,10 @@ static NSTimeInterval requestTimeout = 20.0f;
                                                              @"application/octet-stream",
                                                              @"application/zip",
                                                              @"text/text", nil];
+        // 验证https证书，如不需要屏蔽这块
+        NSString * cerPath = [[NSBundle mainBundle] pathForResource:@"xxxx" ofType:@"cer"];
+        NSData *cerData = [NSData dataWithContentsOfFile:cerPath];
+        manager.securityPolicy = [AFSecurityPolicy policyWithPinningMode:AFSSLPinningModeCertificate withPinnedCertificates:[[NSSet alloc] initWithObjects:cerData, nil]];
     });
     return manager;
 }
