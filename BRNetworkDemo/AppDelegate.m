@@ -7,7 +7,6 @@
 //
 
 #import "AppDelegate.h"
-#import "HttpTool.h"
 
 @interface AppDelegate ()
 
@@ -18,8 +17,6 @@
 
 - (BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions {
     // Override point for customization after application launch.
-    // 开启网络状态监控
-    [HttpTool openNetworkStatusMonitoring];
     
     return YES;
 }

@@ -16,9 +16,9 @@
 		C5A6280F2079BBF4008B3A2F /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = C5A6280D2079BBF4008B3A2F /* LaunchScreen.storyboard */; };
 		C5A628122079BBF4008B3A2F /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = C5A628112079BBF4008B3A2F /* main.m */; };
 		C5A6281C2079BBF5008B3A2F /* BRNetworkDemoTests.m in Sources */ = {isa = PBXBuildFile; fileRef = C5A6281B2079BBF5008B3A2F /* BRNetworkDemoTests.m */; };
-		C5A6282A2079BF10008B3A2F /* HttpTool.m in Sources */ = {isa = PBXBuildFile; fileRef = C5A628292079BF10008B3A2F /* HttpTool.m */; };
 		C5A6282D2079C278008B3A2F /* BRCache.m in Sources */ = {isa = PBXBuildFile; fileRef = C5A6282C2079C278008B3A2F /* BRCache.m */; };
 		C5A628352079E683008B3A2F /* BRBaseRequest.m in Sources */ = {isa = PBXBuildFile; fileRef = C5A628342079E683008B3A2F /* BRBaseRequest.m */; };
+		C5F069BE209307F300C969B9 /* BRNetwork.m in Sources */ = {isa = PBXBuildFile; fileRef = C5F069BD209307F300C969B9 /* BRNetwork.m */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -51,13 +51,12 @@
 		C5A628172079BBF5008B3A2F /* BRNetworkDemoTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = BRNetworkDemoTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		C5A6281B2079BBF5008B3A2F /* BRNetworkDemoTests.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = BRNetworkDemoTests.m; sourceTree = "<group>"; };
 		C5A6281D2079BBF5008B3A2F /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
-		C5A628282079BF10008B3A2F /* HttpTool.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = HttpTool.h; sourceTree = "<group>"; };
-		C5A628292079BF10008B3A2F /* HttpTool.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = HttpTool.m; sourceTree = "<group>"; };
 		C5A6282B2079C277008B3A2F /* BRCache.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = BRCache.h; sourceTree = "<group>"; };
 		C5A6282C2079C278008B3A2F /* BRCache.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = BRCache.m; sourceTree = "<group>"; };
-		C5A628312079D134008B3A2F /* APIConfig.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = APIConfig.h; sourceTree = "<group>"; };
 		C5A628332079E683008B3A2F /* BRBaseRequest.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = BRBaseRequest.h; sourceTree = "<group>"; };
 		C5A628342079E683008B3A2F /* BRBaseRequest.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = BRBaseRequest.m; sourceTree = "<group>"; };
+		C5F069BC209307F300C969B9 /* BRNetwork.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = BRNetwork.h; sourceTree = "<group>"; };
+		C5F069BD209307F300C969B9 /* BRNetwork.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = BRNetwork.m; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -140,22 +139,13 @@
 		C5A628262079BC23008B3A2F /* BRNetwork */ = {
 			isa = PBXGroup;
 			children = (
-				C5A628272079BEF3008B3A2F /* HttpTool */,
+				C5F069BC209307F300C969B9 /* BRNetwork.h */,
+				C5F069BD209307F300C969B9 /* BRNetwork.m */,
+				C5A6282B2079C277008B3A2F /* BRCache.h */,
+				C5A6282C2079C278008B3A2F /* BRCache.m */,
 				C5A628322079E2EE008B3A2F /* YTKNetwork */,
 			);
 			path = BRNetwork;
-			sourceTree = "<group>";
-		};
-		C5A628272079BEF3008B3A2F /* HttpTool */ = {
-			isa = PBXGroup;
-			children = (
-				C5A628312079D134008B3A2F /* APIConfig.h */,
-				C5A628282079BF10008B3A2F /* HttpTool.h */,
-				C5A628292079BF10008B3A2F /* HttpTool.m */,
-				C5A6282B2079C277008B3A2F /* BRCache.h */,
-				C5A6282C2079C278008B3A2F /* BRCache.m */,
-			);
-			path = HttpTool;
 			sourceTree = "<group>";
 		};
 		C5A628322079E2EE008B3A2F /* YTKNetwork */ = {
@@ -318,11 +308,11 @@
 			buildActionMask = 2147483647;
 			files = (
 				C5A628072079BBF4008B3A2F /* ViewController.m in Sources */,
+				C5F069BE209307F300C969B9 /* BRNetwork.m in Sources */,
 				C5A628122079BBF4008B3A2F /* main.m in Sources */,
 				C5A6282D2079C278008B3A2F /* BRCache.m in Sources */,
 				C5A628042079BBF4008B3A2F /* AppDelegate.m in Sources */,
 				C5A628352079E683008B3A2F /* BRBaseRequest.m in Sources */,
-				C5A6282A2079BF10008B3A2F /* HttpTool.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
