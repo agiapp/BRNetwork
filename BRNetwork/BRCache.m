@@ -9,11 +9,10 @@
 #import "BRCache.h"
 #if __has_include(<YYCache/YYCache.h>)
 #import <YYCache/YYCache.h>
-#import <YYDiskCache.h>
 #else
 #import "YYCache.h"
-#import "YYDiskCache.h"
 #endif
+#import "YYDiskCache.h"
 
 static YYCache *_dataCache;
 static NSString *const httpCache = @"HttpCache";

@@ -7,16 +7,13 @@
 //
 
 #import "BRNetwork.h"
-
+#import "BRCache.h"
 #if __has_include(<AFNetworking/AFNetworking.h>)
 #import <AFNetworking/AFNetworking.h>
-#import <AFNetworkActivityIndicatorManager.h>
 #else
 #import "AFNetworking.h"
-#import "AFNetworkActivityIndicatorManager.h"
 #endif
-
-#import "BRCache.h"
+#import "AFNetworkActivityIndicatorManager.h"
 
 @implementation BRNetwork
 
@@ -375,7 +372,7 @@ static NSMutableArray *_allSessionTask;
             NSDateFormatter *formatter = [[NSDateFormatter alloc] init];
             formatter.dateFormat = @"yyyyMMddHHmmss";
             NSString *currentTimeStr = [formatter stringFromDate:[NSDate date]];
-            NSString *uploadFileName1 = [NSString stringWithFormat:@"%@%ld.%@", currentTimeStr, idx, imageType?:@"jpg"];
+            NSString *uploadFileName1 = [NSString stringWithFormat:@"%@%lu.%@", currentTimeStr, idx, imageType?:@"jpg"];
             // 2.使用传入的图片名
             NSString *uploadFileName2 = [NSString stringWithFormat:@"%@.%@", fileNames[idx], imageType?:@"jpg"];
             // 上传图片名

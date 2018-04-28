@@ -29,7 +29,7 @@ Pod::Spec.new do |s|
   s.source_files  = "BRNetwork/*.{h,m}"
   
   # 框架包含的资源包
-  #s.resources  = ""
+  #s.resources  = "xxx"
 
   # 框架要求ARC环境下使用
   s.requires_arc = true
