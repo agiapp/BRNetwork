@@ -21,7 +21,6 @@
 @implementation BRNetwork
 
 static NSString *_baseUrl;
-static BRNetworkStatus _netStatus;
 static BRRequestMethod _requestMethod;
 static NSDictionary *_baseParameters;
 static BOOL _isOpenLog;
@@ -75,14 +74,24 @@ static NSMutableArray *_allSessionTask;
     _isOpenLog = YES;
 }
 
-#pragma mark - 请求方法
-- (void)setRequestMethod:(BRRequestMethod)method {
+#pragma mark - 设置请求方法
++ (void)setRequestMethod:(BRRequestMethod)method {
     _requestMethod = method;
 }
 
 #pragma mark - 设置接口根路径
 + (void)setBaseUrl:(NSString *)baseUrl {
     baseUrl = baseUrl;
+}
+
+#pragma mark - 设置接口基本参数(如:用户ID, Token)
++ (void)setBaseParameters:(NSDictionary *)params {
+    _baseParameters = params;
+}
+
+#pragma mark - 输出Log信息开关
++ (void)setIsOpenLog:(BOOL)isOpenLog {
+    _isOpenLog = isOpenLog;
 }
 
 #pragma mark - 设置接口请求头
@@ -95,11 +104,6 @@ static NSMutableArray *_allSessionTask;
 #pragma mark - 设置请求超时时间(默认30s)
 + (void)setRequestTimeoutInterval:(NSTimeInterval)timeout {
     [self sharedManager].requestSerializer.timeoutInterval = timeout;
-}
-
-#pragma mark - 设置请求方法
-+ (void)setRequestMethod:(BRRequestMethod)method {
-    _requestMethod = method;
 }
 
 #pragma mark - 设置请求序列化类型
@@ -140,16 +144,6 @@ static NSMutableArray *_allSessionTask;
     }
 }
 
-#pragma mark - 设置接口基本参数(如:用户ID, Token)
-+ (void)setBaseParameters:(NSDictionary *)params {
-    _baseParameters = params;
-}
-
-#pragma mark - 输出Log信息开关
-+ (void)setIsOpenLog:(BOOL)isOpenLog {
-    _isOpenLog = isOpenLog;
-}
-
 #pragma mark - 验证https证书
 // 参考链接:http://blog.csdn.net/syg90178aw/article/details/52839103
 + (void)setSecurityPolicyWithCerPath:(NSString *)cerPath validatesDomainName:(BOOL)validatesDomainName {
@@ -166,18 +160,12 @@ static NSMutableArray *_allSessionTask;
     [self sharedManager].securityPolicy = securitypolicy;
 }
 
-#pragma mark - 是否打开网络加载菊花(默认打开)
-+ (void)openNetworkActivityIndicator:(BOOL)open {
-    [[AFNetworkActivityIndicatorManager sharedManager]setEnabled:open];
-}
-
 #pragma mark - 请求方法
-+ (void)requestWithMethod:(BRRequestMethod)method
-                      url:(NSString *)url
-                   params:(NSDictionary *)params
-              cachePolicy:(BRCachePolicy)cachePolicy
-                  success:(BRHttpSuccessBlock)successBlock
-                  failure:(BRHttpFailureBlock)failureBlock {
++ (void)requestUrl:(NSString *)url
+            params:(NSDictionary *)params
+       cachePolicy:(BRCachePolicy)cachePolicy
+           success:(BRHttpSuccessBlock)successBlock
+           failure:(BRHttpFailureBlock)failureBlock {
     if (_baseUrl && _baseUrl.length > 0) {
         // 获取完整的url路径
         url = [NSString stringWithFormat:@"%@%@", _baseUrl, url];
@@ -191,11 +179,10 @@ static NSMutableArray *_allSessionTask;
     if (_isOpenLog) {
         NSLog(@"\n%@：请求参数%@\n", url, params);
     }
-    
     if (cachePolicy == BRCachePolicyNetworkOnly) {
-        [self requestWithMethod:method url:url params:params success:successBlock failure:failureBlock];
+        [self requestWithUrl:url params:params success:successBlock failure:failureBlock];
     } else if (cachePolicy == BRCachePolicyNetworkAndSaveCache) {
-        [self requestWithMethod:method url:url params:params success:^(id responseObject) {
+        [self requestWithUrl:url params:params success:^(id responseObject) {
             // 更新本地缓存
             [BRCache saveHttpCache:responseObject url:url params:params];
             successBlock ? successBlock(responseObject) : nil;
@@ -203,7 +190,7 @@ static NSMutableArray *_allSessionTask;
             failureBlock ? failureBlock(error) : nil;
         }];
     } else if (cachePolicy == BRCachePolicyNetworkElseCache) {
-        [self requestWithMethod:method url:url params:params success:^(id responseObject) {
+        [self requestWithUrl:url params:params success:^(id responseObject) {
             successBlock ? successBlock(responseObject) : nil;
         } failure:^(NSError *error) {
             [BRCache getHttpCache:url params:params block:^(id<NSCoding> object) {
@@ -225,7 +212,7 @@ static NSMutableArray *_allSessionTask;
                 successBlock ? successBlock(object) : nil;
             } else {
                 // 如果没有缓存再从网络获取
-                [self requestWithMethod:method url:url params:params success:^(id responseObject) {
+                [self requestWithUrl:url params:params success:^(id responseObject) {
                     successBlock ? successBlock(responseObject) : nil;
                 } failure:^(NSError *error) {
                     failureBlock ? failureBlock(error) : nil;
@@ -237,7 +224,7 @@ static NSMutableArray *_allSessionTask;
         [BRCache getHttpCache:url params:params block:^(id<NSCoding> object) {
             successBlock ? successBlock(object) : nil;
             // 再从网络获取
-            [self requestWithMethod:method url:url params:params success:^(id responseObject) {
+            [self requestWithUrl:url params:params success:^(id responseObject) {
                 [BRCache saveHttpCache:responseObject url:url params:params];
                 successBlock ? successBlock(responseObject) : nil;
             } failure:^(NSError *error) {
@@ -246,17 +233,16 @@ static NSMutableArray *_allSessionTask;
         }];
     } else {
         // 未知缓存策略 (使用BRCachePolicyNetworkOnly)
-        [self requestWithMethod:method url:url params:params success:successBlock failure:failureBlock];
+        [self requestWithUrl:url params:params success:successBlock failure:failureBlock];
     }
 }
 
 #pragma mark - 网络请求处理
-+ (void)requestWithMethod:(BRRequestMethod)method
-                      url:(NSString *)url
-                   params:(NSDictionary *)params
-                  success:(BRHttpSuccessBlock)successBlock
-                  failure:(BRHttpFailureBlock)failureBlock {
-    [self dataTaskWithMethod:method url:url params:params success:^(NSURLSessionDataTask * _Nonnull task, id _Nullable responseObject) {
++ (void)requestWithUrl:(NSString *)url
+                params:(NSDictionary *)params
+               success:(BRHttpSuccessBlock)successBlock
+               failure:(BRHttpFailureBlock)failureBlock {
+    [self dataTaskUrl:url params:params success:^(NSURLSessionDataTask * _Nonnull task, id _Nullable responseObject) {
         if (_isOpenLog) {
             NSLog(@"请求结果：%@", responseObject);
         }
@@ -272,23 +258,22 @@ static NSMutableArray *_allSessionTask;
 }
 
 #pragma mark - 请求任务
-+ (void)dataTaskWithMethod:(BRRequestMethod)method
-                      url:(NSString *)url
-                   params:(NSDictionary *)params
-                  success:(void (^)(NSURLSessionDataTask * _Nonnull, id _Nullable))success
-                  failure:(void (^)(NSURLSessionDataTask * _Nullable, NSError * _Nonnull))failure {
++ (void)dataTaskUrl:(NSString *)url
+             params:(NSDictionary *)params
+            success:(void (^)(NSURLSessionDataTask * _Nonnull, id _Nullable))success
+            failure:(void (^)(NSURLSessionDataTask * _Nullable, NSError * _Nonnull))failure {
     NSURLSessionTask *sessionTask = nil;
-    if (method == BRRequestMethodGET) {
+    if (_requestMethod == BRRequestMethodGET) {
         sessionTask = [[self sharedManager] GET:url parameters:params progress:nil success:success failure:failure];
-    } else if (method == BRRequestMethodPOST) {
+    } else if (_requestMethod == BRRequestMethodPOST) {
         sessionTask = [[self sharedManager] POST:url parameters:params progress:nil success:success failure:failure];
-    } else if (method == BRRequestMethodHEAD) {
+    } else if (_requestMethod == BRRequestMethodHEAD) {
         sessionTask = [[self sharedManager] HEAD:url parameters:params success:nil failure:failure];
-    } else if (method == BRRequestMethodPUT) {
+    } else if (_requestMethod == BRRequestMethodPUT) {
         sessionTask = [[self sharedManager] PUT:url parameters:params success:nil failure:failure];
-    } else if (method == BRRequestMethodPATCH) {
+    } else if (_requestMethod == BRRequestMethodPATCH) {
         sessionTask = [[self sharedManager] PATCH:url parameters:params success:nil failure:failure];
-    } else if (method == BRRequestMethodDELETE) {
+    } else if (_requestMethod == BRRequestMethodDELETE) {
         sessionTask = [[self sharedManager] DELETE:url parameters:params success:nil failure:failure];
     } else {
         sessionTask = [[self sharedManager] GET:url parameters:params progress:nil success:success failure:failure];
@@ -412,55 +397,6 @@ static NSMutableArray *_allSessionTask;
     sessionTask ? [[self allSessionTask] addObject:sessionTask] : nil;
 }
 
-#pragma mark - 开启网络状态监控
-+ (void)openNetworkStatusMonitoring {
-    // 打开状态栏的等待菊花
-    [AFNetworkActivityIndicatorManager sharedManager].enabled = YES;
-    // 1.创建网络监听管理者
-    AFNetworkReachabilityManager *manager = [AFNetworkReachabilityManager sharedManager];
-    // 2.设置网络状态改变后的处理
-    [manager setReachabilityStatusChangeBlock:^(AFNetworkReachabilityStatus status) {
-        // 当网络状态改变了, 就会调用这个block
-        switch (status) {
-            case AFNetworkReachabilityStatusUnknown:
-                NSLog(@"当前网络未知");
-                _netStatus = BRNetworkStatusUnknown;
-                break;
-            case AFNetworkReachabilityStatusNotReachable:
-                NSLog(@"当前无网络");
-                _netStatus = BRNetworkStatusNotReachable;
-                break;
-            case AFNetworkReachabilityStatusReachableViaWiFi:
-                NSLog(@"当前是wifi环境");
-                _netStatus = BRNetworkStatusReachableViaWiFi;
-                break;
-            case AFNetworkReachabilityStatusReachableViaWWAN:
-                NSLog(@"当前是蜂窝网络");
-                _netStatus = BRNetworkStatusReachableViaWWAN;
-                break;
-            default:
-                break;
-        }
-    }];
-    // 3.开启网络监听
-    [manager startMonitoring];
-}
-
-/** 判断当前是否有网络连接 */
-+ (BOOL)isNetwork {
-    return [AFNetworkReachabilityManager sharedManager].reachable;
-}
-
-/** 判断当前是否是手机网络 */
-+ (BOOL)isWWANNetwork {
-    return [AFNetworkReachabilityManager sharedManager].reachableViaWWAN;
-}
-
-/** 判断当前是否是WIFI网络 */
-+ (BOOL)isWiFiNetwork {
-    return [AFNetworkReachabilityManager sharedManager].reachableViaWiFi;
-}
-
 #pragma mark - 取消所有Http请求
 + (void)cancelAllRequest {
     @synchronized (self) {
@@ -485,12 +421,67 @@ static NSMutableArray *_allSessionTask;
     }
 }
 
+#pragma mark - 实时获取网络状态
++ (void)getNetworkStatusWithBlock:(BRNetworkStatusBlock)networkStatusBlock {
+    // 打开状态栏的等待菊花
+    [AFNetworkActivityIndicatorManager sharedManager].enabled = YES;
+    static dispatch_once_t onceToken;
+    dispatch_once(&onceToken, ^{
+        // 1.创建网络监听管理者
+        AFNetworkReachabilityManager *manager = [AFNetworkReachabilityManager sharedManager];
+        // 2.设置网络状态改变后的处理
+        [manager setReachabilityStatusChangeBlock:^(AFNetworkReachabilityStatus status) {
+            // 当网络状态改变了, 就会调用这个block
+            switch (status) {
+                case AFNetworkReachabilityStatusUnknown:
+                    NSLog(@"当前网络未知");
+                    networkStatusBlock ? networkStatusBlock(BRNetworkStatusUnknown) : nil;
+                    break;
+                case AFNetworkReachabilityStatusNotReachable:
+                    NSLog(@"当前无网络");
+                    networkStatusBlock ? networkStatusBlock(BRNetworkStatusNotReachable) : nil;
+                    break;
+                case AFNetworkReachabilityStatusReachableViaWWAN:
+                    NSLog(@"当前是蜂窝网络");
+                    networkStatusBlock ? networkStatusBlock(BRNetworkStatusReachableViaWWAN) : nil;
+                    break;
+                case AFNetworkReachabilityStatusReachableViaWiFi:
+                    NSLog(@"当前是wifi环境");
+                    networkStatusBlock ? networkStatusBlock(BRNetworkStatusReachableViaWiFi) : nil;
+                    break;
+                default:
+                    break;
+            }
+        }];
+    });
+}
+
+#pragma mark - 是否打开网络加载菊花(默认打开)
++ (void)openNetworkActivityIndicator:(BOOL)open {
+    [[AFNetworkActivityIndicatorManager sharedManager] setEnabled:open];
+}
+
+#pragma mark - 判断当前是否有网络连接
++ (BOOL)isNetwork {
+    return [AFNetworkReachabilityManager sharedManager].reachable;
+}
+
+#pragma mark - 判断当前是否是手机网络
++ (BOOL)isWWANNetwork {
+    return [AFNetworkReachabilityManager sharedManager].reachableViaWWAN;
+}
+
+#pragma mark - 判断当前是否是WIFI网络
++ (BOOL)isWiFiNetwork {
+    return [AFNetworkReachabilityManager sharedManager].reachableViaWiFi;
+}
+
 @end
+
 
 #pragma mark - 新建 NSDictionary 分类, 控制台打印json格式（字典转json）
 
 #ifdef DEBUG
-
 @implementation NSDictionary (BRLog)
 
 - (NSString *)descriptionWithLocale:(id)locale {
@@ -506,5 +497,4 @@ static NSMutableArray *_allSessionTask;
 }
 
 @end
-
 #endif

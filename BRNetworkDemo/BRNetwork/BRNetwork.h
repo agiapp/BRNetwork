@@ -73,13 +73,22 @@ typedef NS_ENUM(NSUInteger, BRResponseSerializer) {
 typedef void (^BRHttpSuccessBlock)(id responseObject);
 /** 失败的回调 */
 typedef void (^BRHttpFailureBlock)(NSError *error);
-/** 缓存的回调 */
-typedef void (^BRHttpCacheBlock)(id responseCache);
+/** 网络状态Block */
+typedef void(^BRNetworkStatusBlock)(BRNetworkStatus status);
 
 @interface BRNetwork : NSObject
 
+/** 设置请求方法 */
++ (void)setRequestMethod:(BRRequestMethod)method;
+
 /** 设置接口根路径 */
 + (void)setBaseUrl:(NSString *)baseUrl;
+
+/** 设置接口基本参数/公共参数(如:用户ID, Token) */
++ (void)setBaseParameters:(NSDictionary *)params;
+
+/** 输出Log信息开关 */
++ (void)setIsOpenLog:(BOOL)isOpenLog;
 
 /** 设置接口请求头 */
 + (void)setRequestHeaderDictionary:(NSDictionary *)dic;
@@ -87,20 +96,11 @@ typedef void (^BRHttpCacheBlock)(id responseCache);
 /** 设置请求超时时间(默认30s) */
 + (void)setRequestTimeoutInterval:(NSTimeInterval)timeout;
 
-/** 请求方法 */
-+ (void)setRequestMethod:(BRRequestMethod)method;
-
 /** 请求序列化类型 */
 + (void)setRequestSerializerType:(BRRequestSerializer)type;
 
 /** 响应序列化类型 */
 + (void)setResponseSerializerType:(BRResponseSerializer)type;
-
-/** 设置接口基本参数(如:用户ID, Token) */
-+ (void)setBaseParameters:(NSDictionary *)params;
-
-/** 输出Log信息开关 */
-+ (void)setIsOpenLog:(BOOL)isOpenLog;
 
 /**
  *  设置自建证书的Https请求
@@ -110,26 +110,21 @@ typedef void (^BRHttpCacheBlock)(id responseCache);
  */
 + (void)setSecurityPolicyWithCerPath:(NSString *)cerPath validatesDomainName:(BOOL)validatesDomainName;
 
-/** 开启网络状态监控 */
-+ (void)openNetworkStatusMonitoring;
-
 
 /**
  *  自定义请求方式
  *
- *  @param method 请求方式(GET, POST, HEAD, PUT, PATCH, DELETE)
  *  @param url 请求地址
  *  @param params 请求参数
  *  @param cachePolicy 缓存策略
  *  @param successBlock 请求成功的回调
  *  @param failureBlock 请求失败的回调
  */
-+ (void)requestWithMethod:(BRRequestMethod)method
-                      url:(NSString *)url
-                   params:(NSDictionary *)params
-              cachePolicy:(BRCachePolicy)cachePolicy
-                  success:(BRHttpSuccessBlock)successBlock
-                  failure:(BRHttpFailureBlock)failureBlock;
++ (void)requestUrl:(NSString *)url
+            params:(NSDictionary *)params
+       cachePolicy:(BRCachePolicy)cachePolicy
+           success:(BRHttpSuccessBlock)successBlock
+           failure:(BRHttpFailureBlock)failureBlock;
 
 /**
  *  下载文件
@@ -198,5 +193,20 @@ typedef void (^BRHttpCacheBlock)(id responseCache);
 
 /** 取消指定URL的Http请求 */
 + (void)cancelRequestWithURL:(NSString *)url;
+
+/** 实时获取网络状态 */
++ (void)getNetworkStatusWithBlock:(BRNetworkStatusBlock)networkStatusBlock;
+
+/** 是否打开网络加载菊花(默认打开) */
++ (void)openNetworkActivityIndicator:(BOOL)open;
+
+/** 判断当前是否有网络连接 */
++ (BOOL)isNetwork;
+
+/** 判断当前是否是手机网络 */
++ (BOOL)isWWANNetwork;
+
+/** 判断当前是否是WIFI网络 */
++ (BOOL)isWiFiNetwork;
 
 @end
