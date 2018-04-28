@@ -2,7 +2,7 @@ Pod::Spec.new do |s|
   # 框架的名称
   s.name         = "BRNetwork"
   # 框架的版本号
-  s.version      = "0.1.1"
+  s.version      = "0.1.0"
   # 框架的简单介绍
   s.summary      = "BRNetwork是一个基于AFNetworking和YYCache封装的轻量级网络请求工具"
   # 框架的详细描述(详细介绍，要比简介长)
@@ -29,7 +29,7 @@ Pod::Spec.new do |s|
   s.source_files  = "BRNetwork/*.{h,m}"
   
   # 框架包含的资源包
-  #s.resources  = "xxx"
+  #s.resources  = "xx"
 
   # 框架要求ARC环境下使用
   s.requires_arc = true

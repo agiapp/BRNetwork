@@ -372,7 +372,7 @@ static NSMutableArray *_allSessionTask;
             NSDateFormatter *formatter = [[NSDateFormatter alloc] init];
             formatter.dateFormat = @"yyyyMMddHHmmss";
             NSString *currentTimeStr = [formatter stringFromDate:[NSDate date]];
-            NSString *uploadFileName1 = [NSString stringWithFormat:@"%@%lu.%@", currentTimeStr, idx, imageType?:@"jpg"];
+            NSString *uploadFileName1 = [NSString stringWithFormat:@"%@%@.%@", currentTimeStr, @(idx), imageType?:@"jpg"];
             // 2.使用传入的图片名
             NSString *uploadFileName2 = [NSString stringWithFormat:@"%@.%@", fileNames[idx], imageType?:@"jpg"];
             // 上传图片名
