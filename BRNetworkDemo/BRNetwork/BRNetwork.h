@@ -113,13 +113,23 @@ typedef void (^BRHttpCacheBlock)(id responseCache);
 /** 开启网络状态监控 */
 + (void)openNetworkStatusMonitoring;
 
-/** 取消所有Http请求 */
-+ (void)cancelAllRequest;
 
-/** 取消指定URL的Http请求 */
-+ (void)cancelRequestWithURL:(NSString *)url;
-
-
+/**
+ *  自定义请求方式
+ *
+ *  @param method 请求方式(GET, POST, HEAD, PUT, PATCH, DELETE)
+ *  @param url 请求地址
+ *  @param params 请求参数
+ *  @param cachePolicy 缓存策略
+ *  @param successBlock 请求成功的回调
+ *  @param failureBlock 请求失败的回调
+ */
++ (void)requestWithMethod:(BRRequestMethod)method
+                      url:(NSString *)url
+                   params:(NSDictionary *)params
+              cachePolicy:(BRCachePolicy)cachePolicy
+                  success:(BRHttpSuccessBlock)successBlock
+                  failure:(BRHttpFailureBlock)failureBlock;
 
 /**
  *  下载文件
@@ -182,5 +192,11 @@ typedef void (^BRHttpCacheBlock)(id responseCache);
                    progress:(void(^)(NSProgress *progress))progress
                     success:(void(^)(id responseObject))success
                     failure:(void(^)(NSError *error))failure;
+
+/** 取消所有Http请求 */
++ (void)cancelAllRequest;
+
+/** 取消指定URL的Http请求 */
++ (void)cancelRequestWithURL:(NSString *)url;
 
 @end

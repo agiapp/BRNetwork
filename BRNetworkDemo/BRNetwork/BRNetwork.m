@@ -75,6 +75,11 @@ static NSMutableArray *_allSessionTask;
     _isOpenLog = YES;
 }
 
+#pragma mark - 请求方法
+- (void)setRequestMethod:(BRRequestMethod)method {
+    _requestMethod = method;
+}
+
 #pragma mark - 设置接口根路径
 + (void)setBaseUrl:(NSString *)baseUrl {
     baseUrl = baseUrl;
@@ -164,30 +169,6 @@ static NSMutableArray *_allSessionTask;
 #pragma mark - 是否打开网络加载菊花(默认打开)
 + (void)openNetworkActivityIndicator:(BOOL)open {
     [[AFNetworkActivityIndicatorManager sharedManager]setEnabled:open];
-}
-
-#pragma mark - 取消所有Http请求
-+ (void)cancelAllRequest {
-    @synchronized (self) {
-        [[self allSessionTask] enumerateObjectsUsingBlock:^(NSURLSessionTask  *_Nonnull task, NSUInteger idx, BOOL * _Nonnull stop) {
-            [task cancel];
-        }];
-        [[self allSessionTask] removeAllObjects];
-    }
-}
-
-#pragma mark - 取消指定URL的Http请求
-+ (void)cancelRequestWithURL:(NSString *)url {
-    if (!url) { return; }
-    @synchronized (self) {
-        [[self allSessionTask] enumerateObjectsUsingBlock:^(NSURLSessionTask  *_Nonnull task, NSUInteger idx, BOOL * _Nonnull stop) {
-            if ([task.currentRequest.URL.absoluteString hasPrefix:url]) {
-                [task cancel];
-                [[self allSessionTask] removeObject:task];
-                *stop = YES;
-            }
-        }];
-    }
 }
 
 #pragma mark - 请求方法
@@ -297,41 +278,22 @@ static NSMutableArray *_allSessionTask;
                   success:(void (^)(NSURLSessionDataTask * _Nonnull, id _Nullable))success
                   failure:(void (^)(NSURLSessionDataTask * _Nullable, NSError * _Nonnull))failure {
     NSURLSessionTask *sessionTask = nil;
-    switch (method) {
-        case BRRequestMethodGET:
-        {
-            sessionTask = [[self sharedManager] GET:url parameters:params progress:nil success:success failure:failure];
-        }
-            break;
-        case BRRequestMethodPOST:
-        {
-            sessionTask = [[self sharedManager] POST:url parameters:params progress:nil success:success failure:failure];
-        }
-            break;
-        case BRRequestMethodHEAD:
-        {
-            sessionTask = [[self sharedManager] HEAD:url parameters:params success:nil failure:failure];
-        }
-            break;
-        case BRRequestMethodPUT:
-        {
-            sessionTask = [[self sharedManager] PUT:url parameters:params success:nil failure:failure];
-        }
-            break;
-        case BRRequestMethodPATCH:
-        {
-            sessionTask = [[self sharedManager] PATCH:url parameters:params success:nil failure:failure];
-        }
-            break;
-        case BRRequestMethodDELETE:
-        {
-            sessionTask = [[self sharedManager] DELETE:url parameters:params success:nil failure:failure];
-        }
-            break;
-            
-        default:
-            break;
+    if (method == BRRequestMethodGET) {
+        sessionTask = [[self sharedManager] GET:url parameters:params progress:nil success:success failure:failure];
+    } else if (method == BRRequestMethodPOST) {
+        sessionTask = [[self sharedManager] POST:url parameters:params progress:nil success:success failure:failure];
+    } else if (method == BRRequestMethodHEAD) {
+        sessionTask = [[self sharedManager] HEAD:url parameters:params success:nil failure:failure];
+    } else if (method == BRRequestMethodPUT) {
+        sessionTask = [[self sharedManager] PUT:url parameters:params success:nil failure:failure];
+    } else if (method == BRRequestMethodPATCH) {
+        sessionTask = [[self sharedManager] PATCH:url parameters:params success:nil failure:failure];
+    } else if (method == BRRequestMethodDELETE) {
+        sessionTask = [[self sharedManager] DELETE:url parameters:params success:nil failure:failure];
+    } else {
+        sessionTask = [[self sharedManager] GET:url parameters:params progress:nil success:success failure:failure];
     }
+    
     //添加最新的sessionTask到数组
     sessionTask ? [[self allSessionTask] addObject:sessionTask] : nil;
 }
@@ -497,6 +459,30 @@ static NSMutableArray *_allSessionTask;
 /** 判断当前是否是WIFI网络 */
 + (BOOL)isWiFiNetwork {
     return [AFNetworkReachabilityManager sharedManager].reachableViaWiFi;
+}
+
+#pragma mark - 取消所有Http请求
++ (void)cancelAllRequest {
+    @synchronized (self) {
+        [[self allSessionTask] enumerateObjectsUsingBlock:^(NSURLSessionTask  *_Nonnull task, NSUInteger idx, BOOL * _Nonnull stop) {
+            [task cancel];
+        }];
+        [[self allSessionTask] removeAllObjects];
+    }
+}
+
+#pragma mark - 取消指定URL的Http请求
++ (void)cancelRequestWithURL:(NSString *)url {
+    if (!url) { return; }
+    @synchronized (self) {
+        [[self allSessionTask] enumerateObjectsUsingBlock:^(NSURLSessionTask  *_Nonnull task, NSUInteger idx, BOOL * _Nonnull stop) {
+            if ([task.currentRequest.URL.absoluteString hasPrefix:url]) {
+                [task cancel];
+                [[self allSessionTask] removeObject:task];
+                *stop = YES;
+            }
+        }];
+    }
 }
 
 @end
