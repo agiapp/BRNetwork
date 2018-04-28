@@ -90,8 +90,8 @@ typedef void(^BRNetworkStatusBlock)(BRNetworkStatus status);
 /** 输出Log信息开关 */
 + (void)setIsOpenLog:(BOOL)isOpenLog;
 
-/** 设置接口请求头 */
-+ (void)setRequestHeaderDictionary:(NSDictionary *)dic;
+/** 设置请求头（额外的HTTP请求头字段） */
++ (void)setRequestHeaderFieldValueDictionary:(NSDictionary *)dic;
 
 /** 设置请求超时时间(默认30s) */
 + (void)setRequestTimeoutInterval:(NSTimeInterval)timeout;
@@ -109,7 +109,6 @@ typedef void(^BRNetworkStatusBlock)(BRNetworkStatus status);
  *  @param validatesDomainName 是否验证域名(默认YES) 如果证书的域名与请求的域名不一致，需设置为NO
  */
 + (void)setSecurityPolicyWithCerPath:(NSString *)cerPath validatesDomainName:(BOOL)validatesDomainName;
-
 
 /**
  *  自定义请求方式

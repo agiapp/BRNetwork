@@ -7,16 +7,16 @@
 //
 
 #import "BRNetwork.h"
-#import <AFNetworking.h>
-#import <AFNetworkActivityIndicatorManager.h>
-#import <AFNetworkReachabilityManager.h>
-#import "BRCache.h"
 
-#ifdef DEBUG
-#define NSLog(FORMAT, ...) fprintf(stderr,"[%s:%d行] %s\n",[[[NSString stringWithUTF8String:__FILE__] lastPathComponent] UTF8String], __LINE__, [[NSString stringWithFormat:FORMAT, ##__VA_ARGS__] UTF8String]);
+#if __has_include(<AFNetworking/AFNetworking.h>)
+#import <AFNetworking/AFNetworking.h>
+#import <AFNetworkActivityIndicatorManager.h>
 #else
-#define NSLog(...)
+#import "AFNetworking.h"
+#import "AFNetworkActivityIndicatorManager.h"
 #endif
+
+#import "BRCache.h"
 
 @implementation BRNetwork
 
@@ -94,10 +94,12 @@ static NSMutableArray *_allSessionTask;
     _isOpenLog = isOpenLog;
 }
 
-#pragma mark - 设置接口请求头
-+ (void)setRequestHeaderDictionary:(NSDictionary *)dic; {
-    for (NSString *key in dic.allKeys) {
-        [[self sharedManager].requestSerializer setValue:dic[key] forHTTPHeaderField:key];
+#pragma mark - 设置请求头（额外的HTTP请求头字段）
++ (void)setRequestHeaderFieldValueDictionary:(NSDictionary *)dic; {
+    if (dic && dic.count > 0) {
+        for (NSString *key in dic.allKeys) {
+            [[self sharedManager].requestSerializer setValue:dic[key] forHTTPHeaderField:key];
+        }
     }
 }
 

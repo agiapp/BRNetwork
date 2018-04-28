@@ -8,8 +8,6 @@
 
 #import "BRBaseRequest.h"
 #import <YTKNetworkAgent.h>
-#import <NSString+YYAdd.h>
-#import <NSArray+YYAdd.h>
 
 // 私有定义,来自服务端定义
 #define kBRCodeStatus           @"code"
@@ -69,6 +67,8 @@ NSString *const BRNotificationOfflineNotifKey = @"BRNotificationOfflineNotifKey"
     return data[@"body"];
 }
 
+
+/*
 - (NSDictionary *)requestHeaderFieldValueDictionary {
     // *.jsonRequest 的请求才会加密
     BOOL needEncry = ([[self requestUrl] rangeOfString:kBRJsonRequest].location != NSNotFound) && [self needEncryFromService];
@@ -86,7 +86,8 @@ NSString *const BRNotificationOfflineNotifKey = @"BRNotificationOfflineNotifKey"
     }
     return param;
 }
-
+*/
+ 
 // 配置需要加密的服务
 - (BOOL)needEncryFromService {
     // 需要加密的service
