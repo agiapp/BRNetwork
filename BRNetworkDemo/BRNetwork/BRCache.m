@@ -12,6 +12,7 @@
 
 static YYCache *_dataCache;
 static NSString *const httpCache = @"HttpCache";
+static NSArray *_filtrationCacheKey;
 
 @implementation BRCache
 
@@ -53,18 +54,29 @@ static NSString *const httpCache = @"HttpCache";
     [_dataCache.diskCache removeAllObjects];
 }
 
-/** 获取缓存数据对应的key值 */
+#pragma mark - 获取缓存数据对应的key值
 + (NSString *)getCacheKey:(NSString *)url params:(NSDictionary *)params {
     if (params == nil) {
         return url;
     }
+    // 过滤指定的参数
+    if (_filtrationCacheKey.count > 0) {
+        NSMutableDictionary *mutableDic = [NSMutableDictionary dictionaryWithDictionary:params];
+        [mutableDic removeObjectsForKeys:_filtrationCacheKey];
+        params =  [mutableDic copy];
+    }
+    
     // 将参数字典转换成字符串
     NSData *data = [NSJSONSerialization dataWithJSONObject:params options:0 error:nil];
     NSString *paramsStr = [[NSString alloc] initWithData:data encoding:NSUTF8StringEncoding];
     // 将url与转换好的参数字符串拼接在一起，成为最终存储的key值
-    NSString *keyStr = [NSString stringWithFormat:@"%@%@", url, paramsStr];
-    return keyStr;
+    NSString *cacheKey = [NSString stringWithFormat:@"%@%@", url, paramsStr];
+    return cacheKey;
 }
 
+#pragma mark - 过滤缓存Key
++ (void)setFiltrationCacheKey:(NSArray *)filtrationCacheKey {
+    _filtrationCacheKey = filtrationCacheKey;
+}
 
 @end

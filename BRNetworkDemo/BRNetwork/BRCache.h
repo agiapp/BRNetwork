@@ -43,14 +43,13 @@
 
 + (void)getHttpCache:(NSString *)url params:(NSDictionary *)params block:(void(^)(id<NSCoding> object))block;
 
-/**
- *  获取网络缓存的总大小 bytes(字节)
- */
+/** 获取网络缓存的总大小 bytes(字节) */
 + (NSInteger)getAllHttpCacheSize;
 
-/**
- *  删除所有网络缓存
- */
+/** 删除所有网络缓存 */
 + (void)removeAllHttpCache;
+
+/** 过滤缓存Key */
++ (void)setFiltrationCacheKey:(NSArray *)filtrationCacheKey;
 
 @end

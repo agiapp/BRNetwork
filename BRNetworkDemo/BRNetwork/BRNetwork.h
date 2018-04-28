@@ -102,6 +102,14 @@ typedef void (^BRHttpCacheBlock)(id responseCache);
 /** 输出Log信息开关 */
 + (void)setIsOpenLog:(BOOL)isOpenLog;
 
+/**
+ *  设置自建证书的Https请求
+ *
+ *  @param cerPath 自建https证书路径
+ *  @param validatesDomainName 是否验证域名(默认YES) 如果证书的域名与请求的域名不一致，需设置为NO
+ */
++ (void)setSecurityPolicyWithCerPath:(NSString *)cerPath validatesDomainName:(BOOL)validatesDomainName;
+
 /** 开启网络状态监控 */
 + (void)openNetworkStatusMonitoring;
 

@@ -53,27 +53,10 @@ static NSMutableArray *_allSessionTask;
                                                              @"application/octet-stream",
                                                              @"application/zip",
                                                              @"text/text", nil];
-        // 验证https证书，如不需要屏蔽这块
-        NSString * cerPath = [[NSBundle mainBundle] pathForResource:@"xxxx" ofType:@"cer"];
-        NSData *cerData = [NSData dataWithContentsOfFile:cerPath];
-        manager.securityPolicy = [AFSecurityPolicy policyWithPinningMode:AFSSLPinningModeCertificate withPinnedCertificates:[[NSSet alloc] initWithObjects:cerData, nil]];
         // 设置默认数据
         [self configDefaultData];
     });
     return manager;
-}
-
-#pragma mark - 验证https证书
-+ (void)setSecurityPolicyWithCerPath:(NSString *)cerPath validatesDomainName:(BOOL)validatesDomainName {
-    NSData *cerData = [NSData dataWithContentsOfFile:cerPath];
-    // 使用证书验证模式
-    AFSecurityPolicy *securitypolicy = [AFSecurityPolicy policyWithPinningMode:AFSSLPinningModeCertificate];
-    // 如果需要验证自建证书(无效证书)，需要设置为YES
-    securitypolicy.allowInvalidCertificates = YES;
-    // 是否需要验证域名，默认为YES
-    securitypolicy.validatesDomainName = validatesDomainName;
-    securitypolicy.pinnedCertificates = [[NSSet alloc] initWithObjects:cerData, nil];
-    [self sharedManager].securityPolicy = securitypolicy;
 }
 
 #pragma mark - 设置默认值
@@ -160,6 +143,22 @@ static NSMutableArray *_allSessionTask;
 #pragma mark - 输出Log信息开关
 + (void)setIsOpenLog:(BOOL)isOpenLog {
     _isOpenLog = isOpenLog;
+}
+
+#pragma mark - 验证https证书
+// 参考链接:http://blog.csdn.net/syg90178aw/article/details/52839103
++ (void)setSecurityPolicyWithCerPath:(NSString *)cerPath validatesDomainName:(BOOL)validatesDomainName {
+    // 先导入证书 证书由服务端生成，具体由服务端人员操作
+    // NSString *cerPath = [[NSBundle mainBundle] pathForResource:@"xxx" ofType:@"cer"]; //证书的路径
+    NSData *cerData = [NSData dataWithContentsOfFile:cerPath];
+    // 使用证书验证模式：AFSSLPinningModeCertificate
+    AFSecurityPolicy *securitypolicy = [AFSecurityPolicy policyWithPinningMode:AFSSLPinningModeCertificate];
+    // 是否允许无效证书（也就是自建的证书），默认为NO；如果需要验证自建证书，需要设置为YES
+    securitypolicy.allowInvalidCertificates = YES;
+    // 是否需要验证域名，默认为YES。假如证书的域名与你请求的域名不一致，需把该项设置为NO；
+    securitypolicy.validatesDomainName = validatesDomainName;
+    securitypolicy.pinnedCertificates = [[NSSet alloc] initWithObjects:cerData, nil];
+    [self sharedManager].securityPolicy = securitypolicy;
 }
 
 #pragma mark - 是否打开网络加载菊花(默认打开)
