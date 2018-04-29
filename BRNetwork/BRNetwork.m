@@ -32,6 +32,11 @@ static NSMutableArray *_allSessionTask;
     return _allSessionTask;
 }
 
+#pragma mark - 开始监测网络状态
++ (void)load {
+    [[AFNetworkReachabilityManager sharedManager] startMonitoring];
+}
+
 + (AFHTTPSessionManager *)sharedManager {
     static AFHTTPSessionManager *manager = nil;
     static dispatch_once_t onceToken;
@@ -64,7 +69,7 @@ static NSMutableArray *_allSessionTask;
     // 设置请求超时时间
     [self sharedManager].requestSerializer.timeoutInterval = 30;
     // 开始监测网络状态
-    [[AFNetworkReachabilityManager sharedManager] startMonitoring];
+    // [[AFNetworkReachabilityManager sharedManager] startMonitoring];
     // 打开状态栏菊花
     [AFNetworkActivityIndicatorManager sharedManager].enabled = YES;
     // 打开日志
@@ -78,7 +83,7 @@ static NSMutableArray *_allSessionTask;
 
 #pragma mark - 设置接口根路径
 + (void)setBaseUrl:(NSString *)baseUrl {
-    baseUrl = baseUrl;
+    _baseUrl = baseUrl;
 }
 
 #pragma mark - 设置接口基本参数(如:用户ID, Token)
@@ -89,6 +94,17 @@ static NSMutableArray *_allSessionTask;
 #pragma mark - 输出Log信息开关
 + (void)setIsOpenLog:(BOOL)isOpenLog {
     _isOpenLog = isOpenLog;
+}
+
+#pragma mark - 是否打开加密
++ (void)setIsOpenAES:(BOOL)isOpenAES {
+    if (isOpenAES) {
+        [[self sharedManager].requestSerializer setValue:@"text/encode" forHTTPHeaderField:@"Content-Type"];
+        [self sharedManager].responseSerializer = [AFHTTPResponseSerializer serializer];
+    } else {
+        [[self sharedManager].requestSerializer setValue:@"application/json" forHTTPHeaderField:@"Content-Type"];
+        [self sharedManager].responseSerializer = [AFJSONResponseSerializer serializer];
+    }
 }
 
 #pragma mark - 设置请求头（额外的HTTP请求头字段）
@@ -160,11 +176,11 @@ static NSMutableArray *_allSessionTask;
 }
 
 #pragma mark - 请求方法
-+ (void)requestUrl:(NSString *)url
-            params:(NSDictionary *)params
-       cachePolicy:(BRCachePolicy)cachePolicy
-           success:(BRHttpSuccessBlock)successBlock
-           failure:(BRHttpFailureBlock)failureBlock {
++ (void)requestWithUrl:(NSString *)url
+                params:(NSDictionary *)params
+           cachePolicy:(BRCachePolicy)cachePolicy
+               success:(BRHttpSuccessBlock)successBlock
+               failure:(BRHttpFailureBlock)failureBlock {
     if (_baseUrl && _baseUrl.length > 0) {
         // 获取完整的url路径
         url = [NSString stringWithFormat:@"%@%@", _baseUrl, url];
@@ -175,9 +191,7 @@ static NSMutableArray *_allSessionTask;
         [mutableDic addEntriesFromDictionary:_baseParameters];
         params = [mutableDic copy];
     }
-    if (_isOpenLog) {
-        NSLog(@"\n%@：请求参数%@\n", url, params);
-    }
+    if (_isOpenLog) NSLog(@"\n%@：请求参数%@\n", url, params);
     if (cachePolicy == BRCachePolicyNetworkOnly) {
         [self requestWithUrl:url params:params success:successBlock failure:failureBlock];
     } else if (cachePolicy == BRCachePolicyNetworkAndSaveCache) {
@@ -224,6 +238,7 @@ static NSMutableArray *_allSessionTask;
             successBlock ? successBlock(object) : nil;
             // 再从网络获取
             [self requestWithUrl:url params:params success:^(id responseObject) {
+                // 更新缓存
                 [BRCache saveHttpCache:responseObject url:url params:params];
                 successBlock ? successBlock(responseObject) : nil;
             } failure:^(NSError *error) {
@@ -241,26 +256,22 @@ static NSMutableArray *_allSessionTask;
                 params:(NSDictionary *)params
                success:(BRHttpSuccessBlock)successBlock
                failure:(BRHttpFailureBlock)failureBlock {
-    [self dataTaskUrl:url params:params success:^(NSURLSessionDataTask * _Nonnull task, id _Nullable responseObject) {
-        if (_isOpenLog) {
-            NSLog(@"请求结果：%@", responseObject);
-        }
+    [self dataTaskWithUrl:url params:params success:^(NSURLSessionDataTask * _Nonnull task, id _Nullable responseObject) {
+        if (_isOpenLog) NSLog(@"请求结果：%@", responseObject);
         [[self allSessionTask] removeObject:task];
         successBlock ? successBlock(responseObject) : nil;
     } failure:^(NSURLSessionDataTask * _Nullable task, NSError * _Nonnull error) {
-        if (_isOpenLog) {
-            NSLog(@"请求失败：%@", error);
-        }
+        if (_isOpenLog) NSLog(@"请求失败：%@", error);
         failureBlock ? failureBlock(error) : nil;
         [[self allSessionTask] removeObject:task];
     }];
 }
 
 #pragma mark - 请求任务
-+ (void)dataTaskUrl:(NSString *)url
-             params:(NSDictionary *)params
-            success:(void (^)(NSURLSessionDataTask * _Nonnull, id _Nullable))success
-            failure:(void (^)(NSURLSessionDataTask * _Nullable, NSError * _Nonnull))failure {
++ (void)dataTaskWithUrl:(NSString *)url
+                 params:(NSDictionary *)params
+                success:(void (^)(NSURLSessionDataTask * _Nonnull, id _Nullable))success
+                failure:(void (^)(NSURLSessionDataTask * _Nullable, NSError * _Nonnull))failure {
     NSURLSessionTask *sessionTask = nil;
     if (_requestMethod == BRRequestMethodGET) {
         sessionTask = [[self sharedManager] GET:url parameters:params progress:nil success:success failure:failure];
@@ -293,9 +304,7 @@ static NSMutableArray *_allSessionTask;
         // 下载进度
         // progress.completedUnitCount: 当前大小;
         // Progress.totalUnitCount: 总大小
-        if (_isOpenLog) {
-            NSLog(@"下载进度：%.2f%%",100.0 * downloadProgress.completedUnitCount / downloadProgress.totalUnitCount);
-        }
+        if (_isOpenLog) NSLog(@"下载进度：%.2f%%",100.0 * downloadProgress.completedUnitCount / downloadProgress.totalUnitCount);
         progress ? progress(downloadProgress) : nil;
     } destination:^NSURL *(NSURL *targetPath, NSURLResponse *response) {
         // 下载完后，实际下载在临时文件夹里；在这里需要保存到本地缓存文件夹里
@@ -398,6 +407,7 @@ static NSMutableArray *_allSessionTask;
 
 #pragma mark - 取消所有Http请求
 + (void)cancelAllRequest {
+    // 锁操作
     @synchronized (self) {
         [[self allSessionTask] enumerateObjectsUsingBlock:^(NSURLSessionTask  *_Nonnull task, NSUInteger idx, BOOL * _Nonnull stop) {
             [task cancel];
@@ -409,6 +419,7 @@ static NSMutableArray *_allSessionTask;
 #pragma mark - 取消指定URL的Http请求
 + (void)cancelRequestWithURL:(NSString *)url {
     if (!url) { return; }
+    // 锁操作
     @synchronized (self) {
         [[self allSessionTask] enumerateObjectsUsingBlock:^(NSURLSessionTask  *_Nonnull task, NSUInteger idx, BOOL * _Nonnull stop) {
             if ([task.currentRequest.URL.absoluteString hasPrefix:url]) {
@@ -422,8 +433,6 @@ static NSMutableArray *_allSessionTask;
 
 #pragma mark - 实时获取网络状态
 + (void)getNetworkStatusWithBlock:(BRNetworkStatusBlock)networkStatusBlock {
-    // 打开状态栏的等待菊花
-    [AFNetworkActivityIndicatorManager sharedManager].enabled = YES;
     static dispatch_once_t onceToken;
     dispatch_once(&onceToken, ^{
         // 1.创建网络监听管理者
@@ -433,19 +442,19 @@ static NSMutableArray *_allSessionTask;
             // 当网络状态改变了, 就会调用这个block
             switch (status) {
                 case AFNetworkReachabilityStatusUnknown:
-                    NSLog(@"当前网络未知");
+                    if (_isOpenLog) NSLog(@"当前网络未知");
                     networkStatusBlock ? networkStatusBlock(BRNetworkStatusUnknown) : nil;
                     break;
                 case AFNetworkReachabilityStatusNotReachable:
-                    NSLog(@"当前无网络");
+                    if (_isOpenLog) NSLog(@"当前无网络");
                     networkStatusBlock ? networkStatusBlock(BRNetworkStatusNotReachable) : nil;
                     break;
                 case AFNetworkReachabilityStatusReachableViaWWAN:
-                    NSLog(@"当前是蜂窝网络");
+                    if (_isOpenLog) NSLog(@"当前是蜂窝网络");
                     networkStatusBlock ? networkStatusBlock(BRNetworkStatusReachableViaWWAN) : nil;
                     break;
                 case AFNetworkReachabilityStatusReachableViaWiFi:
-                    NSLog(@"当前是wifi环境");
+                    if (_isOpenLog) NSLog(@"当前是wifi环境");
                     networkStatusBlock ? networkStatusBlock(BRNetworkStatusReachableViaWiFi) : nil;
                     break;
                 default:

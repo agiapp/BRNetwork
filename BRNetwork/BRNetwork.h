@@ -37,7 +37,7 @@ typedef NS_ENUM(NSUInteger, BRCachePolicy) {
     BRCachePolicyCacheOnly,
     /** 先从缓存获取数据，如果没有再获取网络数据 */
     BRCachePolicyCacheElseNetwork,
-    /** 先从缓存读取数据，然后在从网络获取并且缓存，在这种情况下，Block将产生两次调用 */
+    /** 先从缓存读取数据，然后在从网络获取并且缓存，在这种情况下，Block将产生两次调用『常用这种』 */
     BRCachePolicyCacheThenNetwork
 };
 
@@ -90,6 +90,9 @@ typedef void(^BRNetworkStatusBlock)(BRNetworkStatus status);
 /** 输出Log信息开关 */
 + (void)setIsOpenLog:(BOOL)isOpenLog;
 
+/** 是否打开加密 */
++ (void)setIsOpenAES:(BOOL)isOpenAES;
+
 /** 设置请求头（额外的HTTP请求头字段） */
 + (void)setRequestHeaderFieldValueDictionary:(NSDictionary *)dic;
 
@@ -119,11 +122,11 @@ typedef void(^BRNetworkStatusBlock)(BRNetworkStatus status);
  *  @param successBlock 请求成功的回调
  *  @param failureBlock 请求失败的回调
  */
-+ (void)requestUrl:(NSString *)url
-            params:(NSDictionary *)params
-       cachePolicy:(BRCachePolicy)cachePolicy
-           success:(BRHttpSuccessBlock)successBlock
-           failure:(BRHttpFailureBlock)failureBlock;
++ (void)requestWithUrl:(NSString *)url
+                params:(NSDictionary *)params
+           cachePolicy:(BRCachePolicy)cachePolicy
+               success:(BRHttpSuccessBlock)successBlock
+               failure:(BRHttpFailureBlock)failureBlock;
 
 /**
  *  下载文件

@@ -17,6 +17,7 @@
 		C5A628122079BBF4008B3A2F /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = C5A628112079BBF4008B3A2F /* main.m */; };
 		C5A6281C2079BBF5008B3A2F /* BRNetworkDemoTests.m in Sources */ = {isa = PBXBuildFile; fileRef = C5A6281B2079BBF5008B3A2F /* BRNetworkDemoTests.m */; };
 		C5A628352079E683008B3A2F /* BRBaseRequest.m in Sources */ = {isa = PBXBuildFile; fileRef = C5A628342079E683008B3A2F /* BRBaseRequest.m */; };
+		C5F069C22094797700C969B9 /* BRNetworkHepler.m in Sources */ = {isa = PBXBuildFile; fileRef = C5F069C12094797700C969B9 /* BRNetworkHepler.m */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -51,6 +52,8 @@
 		C5A6281D2079BBF5008B3A2F /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		C5A628332079E683008B3A2F /* BRBaseRequest.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = BRBaseRequest.h; sourceTree = "<group>"; };
 		C5A628342079E683008B3A2F /* BRBaseRequest.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = BRBaseRequest.m; sourceTree = "<group>"; };
+		C5F069C02094797700C969B9 /* BRNetworkHepler.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = BRNetworkHepler.h; path = ../../../../../../Documents/BRNetworkHepler.h; sourceTree = "<group>"; };
+		C5F069C12094797700C969B9 /* BRNetworkHepler.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; name = BRNetworkHepler.m; path = ../../../../../../Documents/BRNetworkHepler.m; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -110,6 +113,7 @@
 				C5A628322079E2EE008B3A2F /* YTKNetwork */,
 				C5A628022079BBF4008B3A2F /* AppDelegate.h */,
 				C5A628032079BBF4008B3A2F /* AppDelegate.m */,
+				C5F069BF2094762C00C969B9 /* Network */,
 				C5A628052079BBF4008B3A2F /* ViewController.h */,
 				C5A628062079BBF4008B3A2F /* ViewController.m */,
 				C5A628082079BBF4008B3A2F /* Main.storyboard */,
@@ -137,6 +141,15 @@
 				C5A628342079E683008B3A2F /* BRBaseRequest.m */,
 			);
 			path = YTKNetwork;
+			sourceTree = "<group>";
+		};
+		C5F069BF2094762C00C969B9 /* Network */ = {
+			isa = PBXGroup;
+			children = (
+				C5F069C02094797700C969B9 /* BRNetworkHepler.h */,
+				C5F069C12094797700C969B9 /* BRNetworkHepler.m */,
+			);
+			path = Network;
 			sourceTree = "<group>";
 		};
 		FEEEFB9E9958968A873D11CC /* Frameworks */ = {
@@ -292,6 +305,7 @@
 				C5A628072079BBF4008B3A2F /* ViewController.m in Sources */,
 				C5A628122079BBF4008B3A2F /* main.m in Sources */,
 				C5A628042079BBF4008B3A2F /* AppDelegate.m in Sources */,
+				C5F069C22094797700C969B9 /* BRNetworkHepler.m in Sources */,
 				C5A628352079E683008B3A2F /* BRBaseRequest.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
