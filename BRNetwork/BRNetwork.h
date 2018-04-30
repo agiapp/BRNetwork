@@ -87,11 +87,14 @@ typedef void(^BRNetworkStatusBlock)(BRNetworkStatus status);
 /** 设置接口基本参数/公共参数(如:用户ID, Token) */
 + (void)setBaseParameters:(NSDictionary *)params;
 
-/** 输出Log信息开关 */
+/** 加密接口参数/加密Body */
++ (void)setEncodeParameters:(NSDictionary *)params;
+
+/** 是否开启日志打印 */
 + (void)setIsOpenLog:(BOOL)isOpenLog;
 
-/** 是否打开加密 */
-+ (void)setIsOpenAES:(BOOL)isOpenAES;
+/** 是否需要加密传输 */
++ (void)setIsNeedEncry:(BOOL)isNeedEncry;
 
 /** 设置请求头（额外的HTTP请求头字段） */
 + (void)setRequestHeaderFieldValueDictionary:(NSDictionary *)dic;

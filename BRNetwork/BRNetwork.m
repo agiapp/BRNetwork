@@ -19,8 +19,10 @@
 
 static NSString *_baseUrl;
 static BRRequestMethod _requestMethod;
-static NSDictionary *_baseParameters;
-static BOOL _isOpenLog;
+static NSDictionary *_baseParameters; // 公共参数
+static NSDictionary *_encodeParameters; // 加密参数
+static BOOL _isOpenLog;   // 是否开启日志打印
+static BOOL _isNeedEncry;  // 是否需要加密传输
 // 所有的请求task数组
 static NSMutableArray *_allSessionTask;
 
@@ -74,6 +76,8 @@ static NSMutableArray *_allSessionTask;
     [AFNetworkActivityIndicatorManager sharedManager].enabled = YES;
     // 打开日志
     _isOpenLog = YES;
+    // 默认不加密传输
+    _isNeedEncry = NO;
 }
 
 #pragma mark - 设置请求方法
@@ -86,28 +90,27 @@ static NSMutableArray *_allSessionTask;
     _baseUrl = baseUrl;
 }
 
-#pragma mark - 设置接口基本参数(如:用户ID, Token)
+#pragma mark - 设置接口基本参数/公共参数 (如:用户ID, Token)
 + (void)setBaseParameters:(NSDictionary *)params {
     _baseParameters = params;
 }
 
-#pragma mark - 输出Log信息开关
+#pragma mark - 加密接口参数/加密Body
++ (void)setEncodeParameters:(NSDictionary *)params {
+    _encodeParameters = params;
+}
+
+#pragma mark - 是否开启日志打印
 + (void)setIsOpenLog:(BOOL)isOpenLog {
     _isOpenLog = isOpenLog;
 }
 
-#pragma mark - 是否打开加密
-+ (void)setIsOpenAES:(BOOL)isOpenAES {
-    if (isOpenAES) {
-        [[self sharedManager].requestSerializer setValue:@"text/encode" forHTTPHeaderField:@"Content-Type"];
-        [self sharedManager].responseSerializer = [AFHTTPResponseSerializer serializer];
-    } else {
-        [[self sharedManager].requestSerializer setValue:@"application/json" forHTTPHeaderField:@"Content-Type"];
-        [self sharedManager].responseSerializer = [AFJSONResponseSerializer serializer];
-    }
+#pragma mark - 是否需要加密传输
++ (void)setIsNeedEncry:(BOOL)isNeedEncry {
+    _isNeedEncry = isNeedEncry;
 }
 
-#pragma mark - 设置请求头（额外的HTTP请求头字段）
+#pragma mark - 设置请求头（额外的HTTP请求头字段，这里可以给请求头添加加密键值对，即加密header/签名）
 + (void)setRequestHeaderFieldValueDictionary:(NSDictionary *)dic; {
     if (dic && dic.count > 0) {
         for (NSString *key in dic.allKeys) {
@@ -191,6 +194,9 @@ static NSMutableArray *_allSessionTask;
         [mutableDic addEntriesFromDictionary:_baseParameters];
         params = [mutableDic copy];
     }
+    if (_isNeedEncry && _encodeParameters.count > 0) {
+        params = _encodeParameters;
+    }
     if (_isOpenLog) NSLog(@"\n%@：请求参数%@\n", url, params);
     if (cachePolicy == BRCachePolicyNetworkOnly) {
         [self requestWithUrl:url params:params success:successBlock failure:failureBlock];
@@ -257,7 +263,7 @@ static NSMutableArray *_allSessionTask;
                success:(BRHttpSuccessBlock)successBlock
                failure:(BRHttpFailureBlock)failureBlock {
     [self dataTaskWithUrl:url params:params success:^(NSURLSessionDataTask * _Nonnull task, id _Nullable responseObject) {
-        if (_isOpenLog) NSLog(@"请求结果：%@", responseObject);
+        if (_isOpenLog) NSLog(@"请求成功：%@", responseObject);
         [[self allSessionTask] removeObject:task];
         successBlock ? successBlock(responseObject) : nil;
     } failure:^(NSURLSessionDataTask * _Nullable task, NSError * _Nonnull error) {
