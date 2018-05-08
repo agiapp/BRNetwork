@@ -13,12 +13,12 @@
 #else
 #import "AFNetworking.h"
 #endif
+// 电池条上网络活动提示(菊花转动)
 #import "AFNetworkActivityIndicatorManager.h"
 
 @implementation BRNetwork
 
 static NSString *_baseUrl;
-static BRRequestMethod _requestMethod;
 static NSDictionary *_baseParameters; // 公共参数
 static NSDictionary *_encodeParameters; // 加密参数
 static BOOL _isOpenLog;   // 是否开启日志打印
@@ -78,11 +78,6 @@ static NSMutableArray *_allSessionTask;
     _isOpenLog = YES;
     // 默认不加密传输
     _isNeedEncry = NO;
-}
-
-#pragma mark - 设置请求方法
-+ (void)setRequestMethod:(BRRequestMethod)method {
-    _requestMethod = method;
 }
 
 #pragma mark - 设置接口根路径
@@ -178,12 +173,13 @@ static NSMutableArray *_allSessionTask;
     [self sharedManager].securityPolicy = securitypolicy;
 }
 
-#pragma mark - 请求方法
-+ (void)requestWithUrl:(NSString *)url
-                params:(NSDictionary *)params
-           cachePolicy:(BRCachePolicy)cachePolicy
-               success:(BRHttpSuccessBlock)successBlock
-               failure:(BRHttpFailureBlock)failureBlock {
+#pragma mark - 网络请求方法
++ (void)requestWithMethod:(BRRequestMethod)method
+                      url:(NSString *)url
+                   params:(NSDictionary *)params
+              cachePolicy:(BRCachePolicy)cachePolicy
+                  success:(BRHttpSuccessBlock)successBlock
+                  failure:(BRHttpFailureBlock)failureBlock {
     if (_baseUrl && _baseUrl.length > 0) {
         // 获取完整的url路径
         url = [NSString stringWithFormat:@"%@%@", _baseUrl, url];
@@ -199,9 +195,9 @@ static NSMutableArray *_allSessionTask;
     }
     if (_isOpenLog) NSLog(@"\n%@：请求参数%@\n", url, params);
     if (cachePolicy == BRCachePolicyNetworkOnly) {
-        [self requestWithUrl:url params:params success:successBlock failure:failureBlock];
+        [self requestWithMethod:method url:url params:params success:successBlock failure:failureBlock];
     } else if (cachePolicy == BRCachePolicyNetworkAndSaveCache) {
-        [self requestWithUrl:url params:params success:^(id responseObject) {
+        [self requestWithMethod:method url:url params:params success:^(id responseObject) {
             // 更新本地缓存
             [BRCache saveHttpCache:responseObject url:url params:params];
             successBlock ? successBlock(responseObject) : nil;
@@ -209,7 +205,7 @@ static NSMutableArray *_allSessionTask;
             failureBlock ? failureBlock(error) : nil;
         }];
     } else if (cachePolicy == BRCachePolicyNetworkElseCache) {
-        [self requestWithUrl:url params:params success:^(id responseObject) {
+        [self requestWithMethod:method url:url params:params success:^(id responseObject) {
             successBlock ? successBlock(responseObject) : nil;
         } failure:^(NSError *error) {
             [BRCache getHttpCache:url params:params block:^(id<NSCoding> object) {
@@ -231,7 +227,7 @@ static NSMutableArray *_allSessionTask;
                 successBlock ? successBlock(object) : nil;
             } else {
                 // 如果没有缓存再从网络获取
-                [self requestWithUrl:url params:params success:^(id responseObject) {
+                [self requestWithMethod:method url:url params:params success:^(id responseObject) {
                     successBlock ? successBlock(responseObject) : nil;
                 } failure:^(NSError *error) {
                     failureBlock ? failureBlock(error) : nil;
@@ -243,7 +239,7 @@ static NSMutableArray *_allSessionTask;
         [BRCache getHttpCache:url params:params block:^(id<NSCoding> object) {
             successBlock ? successBlock(object) : nil;
             // 再从网络获取
-            [self requestWithUrl:url params:params success:^(id responseObject) {
+            [self requestWithMethod:method url:url params:params success:^(id responseObject) {
                 // 更新缓存
                 [BRCache saveHttpCache:responseObject url:url params:params];
                 successBlock ? successBlock(responseObject) : nil;
@@ -253,16 +249,17 @@ static NSMutableArray *_allSessionTask;
         }];
     } else {
         // 未知缓存策略 (使用BRCachePolicyNetworkOnly)
-        [self requestWithUrl:url params:params success:successBlock failure:failureBlock];
+        [self requestWithMethod:method url:url params:params success:successBlock failure:failureBlock];
     }
 }
 
 #pragma mark - 网络请求处理
-+ (void)requestWithUrl:(NSString *)url
-                params:(NSDictionary *)params
-               success:(BRHttpSuccessBlock)successBlock
-               failure:(BRHttpFailureBlock)failureBlock {
-    [self dataTaskWithUrl:url params:params success:^(NSURLSessionDataTask * _Nonnull task, id _Nullable responseObject) {
++ (void)requestWithMethod:(BRRequestMethod)method
+                      url:(NSString *)url
+                   params:(NSDictionary *)params
+                  success:(BRHttpSuccessBlock)successBlock
+                  failure:(BRHttpFailureBlock)failureBlock {
+    [self dataTaskWithMethod:method url:url params:params success:^(NSURLSessionDataTask * _Nonnull task, id _Nullable responseObject) {
         if (_isOpenLog) NSLog(@"请求成功：%@", responseObject);
         [[self allSessionTask] removeObject:task];
         successBlock ? successBlock(responseObject) : nil;
@@ -274,22 +271,23 @@ static NSMutableArray *_allSessionTask;
 }
 
 #pragma mark - 请求任务
-+ (void)dataTaskWithUrl:(NSString *)url
-                 params:(NSDictionary *)params
-                success:(void (^)(NSURLSessionDataTask * _Nonnull, id _Nullable))success
-                failure:(void (^)(NSURLSessionDataTask * _Nullable, NSError * _Nonnull))failure {
++ (void)dataTaskWithMethod:(BRRequestMethod)method
+                       url:(NSString *)url
+                    params:(NSDictionary *)params
+                   success:(void (^)(NSURLSessionDataTask * _Nonnull, id _Nullable))success
+                   failure:(void (^)(NSURLSessionDataTask * _Nullable, NSError * _Nonnull))failure {
     NSURLSessionTask *sessionTask = nil;
-    if (_requestMethod == BRRequestMethodGET) {
+    if (method == BRRequestMethodGET) {
         sessionTask = [[self sharedManager] GET:url parameters:params progress:nil success:success failure:failure];
-    } else if (_requestMethod == BRRequestMethodPOST) {
+    } else if (method == BRRequestMethodPOST) {
         sessionTask = [[self sharedManager] POST:url parameters:params progress:nil success:success failure:failure];
-    } else if (_requestMethod == BRRequestMethodHEAD) {
+    } else if (method == BRRequestMethodHEAD) {
         sessionTask = [[self sharedManager] HEAD:url parameters:params success:nil failure:failure];
-    } else if (_requestMethod == BRRequestMethodPUT) {
+    } else if (method == BRRequestMethodPUT) {
         sessionTask = [[self sharedManager] PUT:url parameters:params success:nil failure:failure];
-    } else if (_requestMethod == BRRequestMethodPATCH) {
+    } else if (method == BRRequestMethodPATCH) {
         sessionTask = [[self sharedManager] PATCH:url parameters:params success:nil failure:failure];
-    } else if (_requestMethod == BRRequestMethodDELETE) {
+    } else if (method == BRRequestMethodDELETE) {
         sessionTask = [[self sharedManager] DELETE:url parameters:params success:nil failure:failure];
     } else {
         sessionTask = [[self sharedManager] GET:url parameters:params progress:nil success:success failure:failure];
@@ -472,6 +470,7 @@ static NSMutableArray *_allSessionTask;
 
 #pragma mark - 是否打开网络加载菊花(默认打开)
 + (void)openNetworkActivityIndicator:(BOOL)open {
+    // 当使用AF发送网络请求时,只要有网络操作,那么在状态栏(电池条)wifi符号旁边显示  菊花提示
     [[AFNetworkActivityIndicatorManager sharedManager] setEnabled:open];
 }
 
