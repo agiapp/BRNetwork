@@ -173,7 +173,25 @@ static NSMutableArray *_allSessionTask;
     [self sharedManager].securityPolicy = securitypolicy;
 }
 
-#pragma mark - 网络请求方法
+#pragma mark - GET请求方法
++ (void)getWithUrl:(NSString *)url
+            params:(NSDictionary *)params
+       cachePolicy:(BRCachePolicy)cachePolicy
+           success:(BRHttpSuccessBlock)successBlock
+           failure:(BRHttpFailureBlock)failureBlock {
+    [self requestWithMethod:BRRequestMethodGET url:url params:params cachePolicy:cachePolicy success:successBlock failure:failureBlock];
+}
+
+#pragma mark - POST请求方法
++ (void)postWithUrl:(NSString *)url
+             params:(NSDictionary *)params
+        cachePolicy:(BRCachePolicy)cachePolicy
+            success:(BRHttpSuccessBlock)successBlock
+            failure:(BRHttpFailureBlock)failureBlock {
+    [self requestWithMethod:BRRequestMethodPOST url:url params:params cachePolicy:cachePolicy success:successBlock failure:failureBlock];
+}
+
+#pragma mark - 网络请求公共方法
 + (void)requestWithMethod:(BRRequestMethod)method
                       url:(NSString *)url
                    params:(NSDictionary *)params
