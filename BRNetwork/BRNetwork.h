@@ -113,7 +113,6 @@ typedef void(^BRNetworkStatusBlock)(BRNetworkStatus status);
  */
 + (void)setSecurityPolicyWithCerPath:(NSString *)cerPath validatesDomainName:(BOOL)validatesDomainName;
 
-
 /**
  *  GET请求方法
  *
