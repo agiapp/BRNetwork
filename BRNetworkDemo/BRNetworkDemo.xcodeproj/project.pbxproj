@@ -9,6 +9,7 @@
 /* Begin PBXBuildFile section */
 		2C34C33AB431E86092090334 /* libPods-BRNetworkDemo.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 04A576A5C48629F2C4A31AFE /* libPods-BRNetworkDemo.a */; };
 		760A99A596A013E3D02016F2 /* libPods-BRNetworkDemoTests.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 774682374ECDF68B24FCEF74 /* libPods-BRNetworkDemoTests.a */; };
+		C51A39B120AAF99400F46E2A /* BRNetworkHepler.m in Sources */ = {isa = PBXBuildFile; fileRef = C51A39AF20AAF99400F46E2A /* BRNetworkHepler.m */; };
 		C5A628042079BBF4008B3A2F /* AppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = C5A628032079BBF4008B3A2F /* AppDelegate.m */; };
 		C5A628072079BBF4008B3A2F /* ViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = C5A628062079BBF4008B3A2F /* ViewController.m */; };
 		C5A6280A2079BBF4008B3A2F /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = C5A628082079BBF4008B3A2F /* Main.storyboard */; };
@@ -17,7 +18,6 @@
 		C5A628122079BBF4008B3A2F /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = C5A628112079BBF4008B3A2F /* main.m */; };
 		C5A6281C2079BBF5008B3A2F /* BRNetworkDemoTests.m in Sources */ = {isa = PBXBuildFile; fileRef = C5A6281B2079BBF5008B3A2F /* BRNetworkDemoTests.m */; };
 		C5A628352079E683008B3A2F /* BRBaseRequest.m in Sources */ = {isa = PBXBuildFile; fileRef = C5A628342079E683008B3A2F /* BRBaseRequest.m */; };
-		C5F069C22094797700C969B9 /* BRNetworkHepler.m in Sources */ = {isa = PBXBuildFile; fileRef = C5F069C12094797700C969B9 /* BRNetworkHepler.m */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -37,6 +37,8 @@
 		774682374ECDF68B24FCEF74 /* libPods-BRNetworkDemoTests.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libPods-BRNetworkDemoTests.a"; sourceTree = BUILT_PRODUCTS_DIR; };
 		ADB6580BC667CD937EFD5BB6 /* Pods-BRNetworkDemo.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-BRNetworkDemo.release.xcconfig"; path = "Pods/Target Support Files/Pods-BRNetworkDemo/Pods-BRNetworkDemo.release.xcconfig"; sourceTree = "<group>"; };
 		B218173A487991F64F161B5C /* Pods-BRNetworkDemo.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-BRNetworkDemo.debug.xcconfig"; path = "Pods/Target Support Files/Pods-BRNetworkDemo/Pods-BRNetworkDemo.debug.xcconfig"; sourceTree = "<group>"; };
+		C51A39AF20AAF99400F46E2A /* BRNetworkHepler.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BRNetworkHepler.m; sourceTree = "<group>"; };
+		C51A39B020AAF99400F46E2A /* BRNetworkHepler.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BRNetworkHepler.h; sourceTree = "<group>"; };
 		C5A627FF2079BBF4008B3A2F /* BRNetworkDemo.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = BRNetworkDemo.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		C5A628022079BBF4008B3A2F /* AppDelegate.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = AppDelegate.h; sourceTree = "<group>"; };
 		C5A628032079BBF4008B3A2F /* AppDelegate.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = AppDelegate.m; sourceTree = "<group>"; };
@@ -52,8 +54,6 @@
 		C5A6281D2079BBF5008B3A2F /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		C5A628332079E683008B3A2F /* BRBaseRequest.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = BRBaseRequest.h; sourceTree = "<group>"; };
 		C5A628342079E683008B3A2F /* BRBaseRequest.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = BRBaseRequest.m; sourceTree = "<group>"; };
-		C5F069C02094797700C969B9 /* BRNetworkHepler.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = BRNetworkHepler.h; path = ../../../../../../Documents/BRNetworkHepler.h; sourceTree = "<group>"; };
-		C5F069C12094797700C969B9 /* BRNetworkHepler.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; name = BRNetworkHepler.m; path = ../../../../../../Documents/BRNetworkHepler.m; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -146,8 +146,8 @@
 		C5F069BF2094762C00C969B9 /* Network */ = {
 			isa = PBXGroup;
 			children = (
-				C5F069C02094797700C969B9 /* BRNetworkHepler.h */,
-				C5F069C12094797700C969B9 /* BRNetworkHepler.m */,
+				C51A39B020AAF99400F46E2A /* BRNetworkHepler.h */,
+				C51A39AF20AAF99400F46E2A /* BRNetworkHepler.m */,
 			);
 			path = Network;
 			sourceTree = "<group>";
@@ -305,7 +305,7 @@
 				C5A628072079BBF4008B3A2F /* ViewController.m in Sources */,
 				C5A628122079BBF4008B3A2F /* main.m in Sources */,
 				C5A628042079BBF4008B3A2F /* AppDelegate.m in Sources */,
-				C5F069C22094797700C969B9 /* BRNetworkHepler.m in Sources */,
+				C51A39B120AAF99400F46E2A /* BRNetworkHepler.m in Sources */,
 				C5A628352079E683008B3A2F /* BRBaseRequest.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
