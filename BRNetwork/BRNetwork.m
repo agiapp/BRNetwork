@@ -25,6 +25,7 @@ static BOOL _isOpenLog;   // 是否开启日志打印
 static BOOL _isNeedEncry;  // 是否需要加密传输
 // 所有的请求task数组
 static NSMutableArray *_allSessionTask;
+static AFHTTPSessionManager *_sessionManager;
 
 #pragma mark - 所有的请求task数组
 + (NSMutableArray *)allSessionTask {
@@ -36,40 +37,36 @@ static NSMutableArray *_allSessionTask;
 
 #pragma mark - 开始监测网络状态
 + (void)load {
+    // 开始监测网络状态
     [[AFNetworkReachabilityManager sharedManager] startMonitoring];
 }
 
-+ (AFHTTPSessionManager *)sharedManager {
-    static AFHTTPSessionManager *manager = nil;
-    static dispatch_once_t onceToken;
-    dispatch_once(&onceToken, ^{
-        // 创建请求管理者对象
-        manager = [AFHTTPSessionManager manager];
-        // 配置响应序列化(设置请求接口回来的时候支持什么类型的数据,设置接收参数类型)
-        manager.responseSerializer.acceptableContentTypes = [NSSet setWithObjects:@"application/json",
-                                                             @"text/html",
-                                                             @"text/json",
-                                                             @"text/plain",
-                                                             @"text/javascript",
-                                                             @"text/xml",
-                                                             @"image/*",
-                                                             @"application/octet-stream",
-                                                             @"application/zip",
-                                                             @"text/text", nil];
-        // 设置默认数据
-        [self configDefaultData];
-    });
-    return manager;
++ (void)initialize {
+    // 创建请求管理者对象
+    _sessionManager = [AFHTTPSessionManager manager];
+    // 配置响应序列化(设置请求接口回来的时候支持什么类型的数据,设置接收参数类型)
+    _sessionManager.responseSerializer.acceptableContentTypes = [NSSet setWithObjects:@"application/json",
+                                                         @"text/html",
+                                                         @"text/json",
+                                                         @"text/plain",
+                                                         @"text/javascript",
+                                                         @"text/xml",
+                                                         @"image/*",
+                                                         @"application/octet-stream",
+                                                         @"application/zip",
+                                                         @"text/text", nil];
+    // 设置默认数据
+    [self configDefaultData];
 }
 
 #pragma mark - 设置默认值
 + (void)configDefaultData {
     // 设置请求参数的格式：二进制格式
-    [self sharedManager].requestSerializer = [AFHTTPRequestSerializer serializer];
+    _sessionManager.requestSerializer = [AFHTTPRequestSerializer serializer];
     // 设置服务器返回结果的格式：JSON格式
-    [self sharedManager].responseSerializer = [AFJSONResponseSerializer serializer];
+    _sessionManager.responseSerializer = [AFJSONResponseSerializer serializer];
     // 设置请求超时时间
-    [self sharedManager].requestSerializer.timeoutInterval = 30;
+    _sessionManager.requestSerializer.timeoutInterval = 30;
     // 开始监测网络状态
     // [[AFNetworkReachabilityManager sharedManager] startMonitoring];
     // 打开状态栏菊花
@@ -109,14 +106,14 @@ static NSMutableArray *_allSessionTask;
 + (void)setRequestHeaderFieldValueDictionary:(NSDictionary *)dic; {
     if (dic && dic.count > 0) {
         for (NSString *key in dic.allKeys) {
-            [[self sharedManager].requestSerializer setValue:dic[key] forHTTPHeaderField:key];
+            [_sessionManager.requestSerializer setValue:dic[key] forHTTPHeaderField:key];
         }
     }
 }
 
 #pragma mark - 设置请求超时时间(默认30s)
 + (void)setRequestTimeoutInterval:(NSTimeInterval)timeout {
-    [self sharedManager].requestSerializer.timeoutInterval = timeout;
+    _sessionManager.requestSerializer.timeoutInterval = timeout;
 }
 
 #pragma mark - 设置请求序列化类型
@@ -124,12 +121,12 @@ static NSMutableArray *_allSessionTask;
     switch (type) {
         case BRRequestSerializerHTTP:
         {
-            [self sharedManager].requestSerializer = [AFHTTPRequestSerializer serializer];
+            _sessionManager.requestSerializer = [AFHTTPRequestSerializer serializer];
         }
             break;
         case BRRequestSerializerJSON:
         {
-            [self sharedManager].requestSerializer = [AFJSONRequestSerializer serializer];
+            _sessionManager.requestSerializer = [AFJSONRequestSerializer serializer];
         }
             break;
             
@@ -143,12 +140,12 @@ static NSMutableArray *_allSessionTask;
     switch (type) {
         case BRResponseSerializerHTTP:
         {
-            [self sharedManager].responseSerializer = [AFHTTPResponseSerializer serializer];
+            _sessionManager.responseSerializer = [AFHTTPResponseSerializer serializer];
         }
             break;
         case BRResponsetSerializerJSON:
         {
-            [self sharedManager].responseSerializer = [AFJSONResponseSerializer serializer];
+            _sessionManager.responseSerializer = [AFJSONResponseSerializer serializer];
         }
             break;
             
@@ -170,7 +167,7 @@ static NSMutableArray *_allSessionTask;
     // 是否需要验证域名，默认为YES。假如证书的域名与你请求的域名不一致，需把该项设置为NO；
     securitypolicy.validatesDomainName = validatesDomainName;
     securitypolicy.pinnedCertificates = [[NSSet alloc] initWithObjects:cerData, nil];
-    [self sharedManager].securityPolicy = securitypolicy;
+    _sessionManager.securityPolicy = securitypolicy;
 }
 
 #pragma mark - GET请求方法
@@ -296,19 +293,19 @@ static NSMutableArray *_allSessionTask;
                    failure:(void (^)(NSURLSessionDataTask * _Nullable, NSError * _Nonnull))failure {
     NSURLSessionTask *sessionTask = nil;
     if (method == BRRequestMethodGET) {
-        sessionTask = [[self sharedManager] GET:url parameters:params progress:nil success:success failure:failure];
+        sessionTask = [_sessionManager GET:url parameters:params progress:nil success:success failure:failure];
     } else if (method == BRRequestMethodPOST) {
-        sessionTask = [[self sharedManager] POST:url parameters:params progress:nil success:success failure:failure];
+        sessionTask = [_sessionManager POST:url parameters:params progress:nil success:success failure:failure];
     } else if (method == BRRequestMethodHEAD) {
-        sessionTask = [[self sharedManager] HEAD:url parameters:params success:nil failure:failure];
+        sessionTask = [_sessionManager HEAD:url parameters:params success:nil failure:failure];
     } else if (method == BRRequestMethodPUT) {
-        sessionTask = [[self sharedManager] PUT:url parameters:params success:nil failure:failure];
+        sessionTask = [_sessionManager PUT:url parameters:params success:nil failure:failure];
     } else if (method == BRRequestMethodPATCH) {
-        sessionTask = [[self sharedManager] PATCH:url parameters:params success:nil failure:failure];
+        sessionTask = [_sessionManager PATCH:url parameters:params success:nil failure:failure];
     } else if (method == BRRequestMethodDELETE) {
-        sessionTask = [[self sharedManager] DELETE:url parameters:params success:nil failure:failure];
+        sessionTask = [_sessionManager DELETE:url parameters:params success:nil failure:failure];
     } else {
-        sessionTask = [[self sharedManager] GET:url parameters:params progress:nil success:success failure:failure];
+        sessionTask = [_sessionManager GET:url parameters:params progress:nil success:success failure:failure];
     }
     
     //添加最新的sessionTask到数组
@@ -322,7 +319,7 @@ static NSMutableArray *_allSessionTask;
                     failure:(void(^)(NSError *error))failure {
     NSURL *URL = [NSURL URLWithString:url];
     NSURLRequest *request = [NSURLRequest requestWithURL:URL];
-    __block NSURLSessionDownloadTask *downloadTask = [[self sharedManager] downloadTaskWithRequest:request progress:^(NSProgress * _Nonnull downloadProgress) {
+    __block NSURLSessionDownloadTask *downloadTask = [_sessionManager downloadTaskWithRequest:request progress:^(NSProgress * _Nonnull downloadProgress) {
         // 下载进度
         // progress.completedUnitCount: 当前大小;
         // Progress.totalUnitCount: 总大小
@@ -363,7 +360,7 @@ static NSMutableArray *_allSessionTask;
                  progress:(void(^)(NSProgress *progress))progress
                   success:(void(^)(id responseObject))success
                   failure:(void(^)(NSError *error))failure {
-    NSURLSessionTask *sessionTask = [[self sharedManager] POST:Url parameters:params constructingBodyWithBlock:^(id<AFMultipartFormData>  _Nonnull formData) {
+    NSURLSessionTask *sessionTask = [_sessionManager POST:Url parameters:params constructingBodyWithBlock:^(id<AFMultipartFormData>  _Nonnull formData) {
         NSError *error = nil;
         [formData appendPartWithFileURL:[NSURL URLWithString:filePath] name:nameKey error:&error];
         if (failure && error) {
@@ -394,7 +391,7 @@ static NSMutableArray *_allSessionTask;
                    progress:(void(^)(NSProgress *progress))progress
                     success:(void(^)(id responseObject))success
                     failure:(void(^)(NSError *error))failure {
-    NSURLSessionTask *sessionTask = [[self sharedManager] POST:Url parameters:params constructingBodyWithBlock:^(id<AFMultipartFormData>  _Nonnull formData) {
+    NSURLSessionTask *sessionTask = [_sessionManager POST:Url parameters:params constructingBodyWithBlock:^(id<AFMultipartFormData>  _Nonnull formData) {
         // 循环遍历上传图片
         [images enumerateObjectsUsingBlock:^(UIImage * _Nonnull image, NSUInteger idx, BOOL * _Nonnull stop) {
             // 图片经过等比压缩后得到的二进制文件(imageData就是要上传的数据)
