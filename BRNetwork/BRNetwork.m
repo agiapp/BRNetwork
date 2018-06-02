@@ -208,7 +208,11 @@ static AFHTTPSessionManager *_sessionManager;
     if (_isNeedEncry && _encodeParameters.count > 0) {
         params = _encodeParameters;
     }
-    if (_isOpenLog) NSLog(@"\n%@：请求参数%@\n", url, params);
+    if (_isOpenLog) {
+        NSLog(@"---------------- start ------------------");
+        NSLog(@"%@", url);
+        NSLog(@"请求参数：%@", params);
+    }
     if (cachePolicy == BRCachePolicyNetworkOnly) {
         [self requestWithMethod:method url:url params:params success:successBlock failure:failureBlock];
     } else if (cachePolicy == BRCachePolicyNetworkAndSaveCache) {
@@ -275,11 +279,17 @@ static AFHTTPSessionManager *_sessionManager;
                   success:(BRHttpSuccessBlock)successBlock
                   failure:(BRHttpFailureBlock)failureBlock {
     [self dataTaskWithMethod:method url:url params:params success:^(NSURLSessionDataTask * _Nonnull task, id _Nullable responseObject) {
-        if (_isOpenLog) NSLog(@"请求成功：%@", responseObject);
+        if (_isOpenLog) {
+            NSLog(@"请求成功：%@", responseObject);
+            NSLog(@"----------------- end -------------------");
+        }
         [[self allSessionTask] removeObject:task];
         successBlock ? successBlock(responseObject) : nil;
     } failure:^(NSURLSessionDataTask * _Nullable task, NSError * _Nonnull error) {
-        if (_isOpenLog) NSLog(@"请求失败：%@", error);
+        if (_isOpenLog) {
+            NSLog(@"请求失败：%@", error);
+            NSLog(@"----------------- end -------------------");
+        }
         failureBlock ? failureBlock(error) : nil;
         [[self allSessionTask] removeObject:task];
     }];
