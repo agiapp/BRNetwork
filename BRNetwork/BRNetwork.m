@@ -17,11 +17,11 @@
 #import "AFNetworkActivityIndicatorManager.h"
 
 @implementation BRNetwork
-
+    
 static NSString *_baseUrl;
 static NSDictionary *_baseParameters; // 公共参数
 static NSDictionary *_encodeParameters; // 加密参数
-static BOOL _isOpenLog;   // 是否开启日志打印
+static BOOL _isOpenLog;    // 是否开启日志打印
 static BOOL _isNeedEncry;  // 是否需要加密传输
 // 所有的请求task数组
 static NSMutableArray *_allSessionTask;
@@ -519,20 +519,17 @@ static AFHTTPSessionManager *_sessionManager;
 
 #pragma mark - 新建 NSDictionary 分类, 控制台打印json格式（字典转json）
 
-#ifdef DEBUG
+
 @implementation NSDictionary (BRLog)
 
 - (NSString *)descriptionWithLocale:(id)locale {
-    NSString *logString = nil;
-    @try {
-        logString = [[NSString alloc] initWithData:[NSJSONSerialization dataWithJSONObject:self options:NSJSONWritingPrettyPrinted error:nil] encoding:NSUTF8StringEncoding];
-    } @catch (NSException *exception) {
-        logString = [NSString stringWithFormat:@"reason: %@ \n%@", exception.reason, self.description];
-    } @finally {
-        
+    NSError *error = nil;
+    NSString *logString = [[NSString alloc] initWithData:[NSJSONSerialization dataWithJSONObject:self options:NSJSONWritingPrettyPrinted error:&error] encoding:NSUTF8StringEncoding];
+    if (error) {
+        logString = [NSString stringWithFormat:@"reason: %@ \n%@", error.localizedFailureReason, error.localizedDescription];
     }
     return logString;
 }
 
 @end
-#endif
+
