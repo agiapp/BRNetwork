@@ -519,17 +519,28 @@ static AFHTTPSessionManager *_sessionManager;
 
 #pragma mark - 新建 NSDictionary 分类, 控制台打印json格式（字典转json）
 
-
+#ifdef DEBUG
 @implementation NSDictionary (BRLog)
 
 - (NSString *)descriptionWithLocale:(id)locale {
-    NSError *error = nil;
-    NSString *logString = [[NSString alloc] initWithData:[NSJSONSerialization dataWithJSONObject:self options:NSJSONWritingPrettyPrinted error:&error] encoding:NSUTF8StringEncoding];
-    if (error) {
-        logString = [NSString stringWithFormat:@"reason: %@ \n%@", error.localizedFailureReason, error.localizedDescription];
+    NSString *logString = nil;
+    @try {
+        // 一定要加这个判断，防止格式不对而崩溃
+        if ([NSJSONSerialization isValidJSONObject:self]) {
+            // 字典转Json字符串
+            NSError *error = nil;
+            NSData *jsonData = [NSJSONSerialization dataWithJSONObject:self options:NSJSONWritingPrettyPrinted error:&error];
+            logString = [[NSString alloc] initWithData:jsonData encoding:NSUTF8StringEncoding];
+        }
+    } @catch (NSException *exception) {
+        logString = [NSString stringWithFormat:@"reason: %@ \n%@", exception.reason, self.description];
+    } @finally {
+        
     }
     return logString;
 }
 
 @end
+#endif
+
 
