@@ -279,6 +279,17 @@ static AFHTTPSessionManager *_sessionManager;
                   success:(BRHttpSuccessBlock)successBlock
                   failure:(BRHttpFailureBlock)failureBlock {
     [self dataTaskWithMethod:method url:url params:params success:^(NSURLSessionDataTask * _Nonnull task, id _Nullable responseObject) {
+        // 响应序列化类型是HTTP时，请求结果输出的是二进制数据
+        if (![NSJSONSerialization isValidJSONObject:responseObject]) {
+            NSError *error = nil;
+            // 将二进制数据序列化成JSON数据
+            id obj = [NSJSONSerialization JSONObjectWithData:responseObject options:NSJSONReadingMutableContainers error:&error];
+            if (error) {
+                NSLog(@"二进制数据序列化成JSON数据失败：%@", error);
+            } else {
+                responseObject = obj;
+            }
+        }
         if (_isOpenLog) {
             NSLog(@"请求成功：%@", responseObject);
             NSLog(@"----------------- end -------------------");
@@ -542,5 +553,3 @@ static AFHTTPSessionManager *_sessionManager;
 
 @end
 #endif
-
-
