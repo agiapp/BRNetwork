@@ -31,13 +31,13 @@ typedef NS_ENUM(NSUInteger, BRCachePolicy) {
     BRCachePolicyNetworkOnly = 0,
     /** 先从网络获取数据，再更新本地缓存 */
     BRCachePolicyNetworkAndSaveCache,
-    /** 先从网络获取数据，如果获取失败再从缓存获取 */
+    /** 先从网络获取数据，再更新本地缓存，如果网络获取失败还会从缓存获取 */
     BRCachePolicyNetworkElseCache,
-    /** 仅从缓存获取数据（如果缓存没有数据，返回一个空） */
+    /** 仅从缓存获取数据 */
     BRCachePolicyCacheOnly,
-    /** 先从缓存获取数据，如果没有再获取网络数据 */
+    /** 先从缓存获取数据，如果没有再获取网络数据，网络数据获取成功后更新本地缓存 */
     BRCachePolicyCacheElseNetwork,
-    /** 先从缓存读取数据，然后在从网络获取并且缓存，在这种情况下，Block将产生两次调用『常用这种』 */
+    /** 先从缓存读取数据，然后在从网络获取并且缓存，在这种情况下，Block将产生两次调用 */
     BRCachePolicyCacheThenNetwork
 };
 

@@ -65,10 +65,10 @@ static AFHTTPSessionManager *_sessionManager;
     _sessionManager.requestSerializer = [AFHTTPRequestSerializer serializer];
     // 设置服务器返回结果的格式：JSON格式
     _sessionManager.responseSerializer = [AFJSONResponseSerializer serializer];
+    // 最大请求并发任务数
+    //_sessionManager.operationQueue.maxConcurrentOperationCount = 5;
     // 设置请求超时时间
     _sessionManager.requestSerializer.timeoutInterval = 30;
-    // 开始监测网络状态
-    // [[AFNetworkReachabilityManager sharedManager] startMonitoring];
     // 打开状态栏菊花
     [AFNetworkActivityIndicatorManager sharedManager].enabled = YES;
     // 打开日志
@@ -158,7 +158,8 @@ static AFHTTPSessionManager *_sessionManager;
 // 参考链接:http://blog.csdn.net/syg90178aw/article/details/52839103
 + (void)setSecurityPolicyWithCerPath:(NSString *)cerPath validatesDomainName:(BOOL)validatesDomainName {
     // 先导入证书 证书由服务端生成，具体由服务端人员操作
-    // NSString *cerPath = [[NSBundle mainBundle] pathForResource:@"xxx" ofType:@"cer"]; //证书的路径
+    // NSString *cerPath = [[NSBundle mainBundle] pathForResource:@"xxx" ofType:@"cer"]; // CA证书地址
+    // 获取CA证书数据
     NSData *cerData = [NSData dataWithContentsOfFile:cerPath];
     // 使用证书验证模式：AFSSLPinningModeCertificate
     AFSecurityPolicy *securitypolicy = [AFSecurityPolicy policyWithPinningMode:AFSSLPinningModeCertificate];
@@ -166,6 +167,7 @@ static AFHTTPSessionManager *_sessionManager;
     securitypolicy.allowInvalidCertificates = YES;
     // 是否需要验证域名，默认为YES。假如证书的域名与你请求的域名不一致，需把该项设置为NO；
     securitypolicy.validatesDomainName = validatesDomainName;
+    // 根据验证模式来返回用于验证服务器的证书
     securitypolicy.pinnedCertificates = [[NSSet alloc] initWithObjects:cerData, nil];
     _sessionManager.securityPolicy = securitypolicy;
 }
@@ -195,7 +197,7 @@ static AFHTTPSessionManager *_sessionManager;
               cachePolicy:(BRCachePolicy)cachePolicy
                   success:(BRHttpSuccessBlock)successBlock
                   failure:(BRHttpFailureBlock)failureBlock {
-    if (_baseUrl && _baseUrl.length > 0) {
+    if ((!url || ![url hasPrefix:@"http"]) && _baseUrl && _baseUrl.length > 0) {
         // 获取完整的url路径
         url = [NSString stringWithFormat:@"%@%@", _baseUrl, url];
     }
@@ -217,7 +219,7 @@ static AFHTTPSessionManager *_sessionManager;
         [self requestWithMethod:method url:url params:params success:successBlock failure:failureBlock];
     } else if (cachePolicy == BRCachePolicyNetworkAndSaveCache) {
         [self requestWithMethod:method url:url params:params success:^(id responseObject) {
-            // 更新本地缓存
+            // 更新缓存
             [BRCache saveHttpCache:responseObject url:url params:params];
             successBlock ? successBlock(responseObject) : nil;
         } failure:^(NSError *error) {
@@ -225,6 +227,8 @@ static AFHTTPSessionManager *_sessionManager;
         }];
     } else if (cachePolicy == BRCachePolicyNetworkElseCache) {
         [self requestWithMethod:method url:url params:params success:^(id responseObject) {
+            // 更新缓存
+            [BRCache saveHttpCache:responseObject url:url params:params];
             successBlock ? successBlock(responseObject) : nil;
         } failure:^(NSError *error) {
             [BRCache getHttpCache:url params:params block:^(id<NSCoding> object) {
@@ -247,6 +251,8 @@ static AFHTTPSessionManager *_sessionManager;
             } else {
                 // 如果没有缓存再从网络获取
                 [self requestWithMethod:method url:url params:params success:^(id responseObject) {
+                    // 更新缓存
+                    [BRCache saveHttpCache:responseObject url:url params:params];
                     successBlock ? successBlock(responseObject) : nil;
                 } failure:^(NSError *error) {
                     failureBlock ? failureBlock(error) : nil;
@@ -256,7 +262,9 @@ static AFHTTPSessionManager *_sessionManager;
     } else if (cachePolicy == BRCachePolicyCacheThenNetwork) {
         // 先从缓存读取数据（这种情况successBlock调用两次）
         [BRCache getHttpCache:url params:params block:^(id<NSCoding> object) {
-            successBlock ? successBlock(object) : nil;
+            if (object) {
+                successBlock ? successBlock(object) : nil;
+            }
             // 再从网络获取
             [self requestWithMethod:method url:url params:params success:^(id responseObject) {
                 // 更新缓存
