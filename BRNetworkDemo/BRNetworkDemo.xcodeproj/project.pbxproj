@@ -110,9 +110,9 @@
 		C5A628012079BBF4008B3A2F /* BRNetworkDemo */ = {
 			isa = PBXGroup;
 			children = (
-				C5A628322079E2EE008B3A2F /* YTKNetwork */,
 				C5A628022079BBF4008B3A2F /* AppDelegate.h */,
 				C5A628032079BBF4008B3A2F /* AppDelegate.m */,
+				C5A628322079E2EE008B3A2F /* YTKNetwork */,
 				C5F069BF2094762C00C969B9 /* Network */,
 				C5A628052079BBF4008B3A2F /* ViewController.h */,
 				C5A628062079BBF4008B3A2F /* ViewController.m */,

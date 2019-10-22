@@ -8,7 +8,7 @@
 //  二次封装 YTKNetwork 库
 //
 
-#import "YTKBaseRequest.h"
+#import "YTKRequest.h"
 
 typedef NS_ENUM(NSInteger , BRRequestStatus) {
     /** 来自服务器定义 */
@@ -33,7 +33,7 @@ typedef NS_ENUM(NSInteger , BRRequestStatus) {
 
 typedef void (^BRRequestBlock)(BRRequestStatus requestStatus, NSString *message, id responseObject);
 
-@interface BRBaseRequest : YTKBaseRequest
+@interface BRBaseRequest : YTKRequest
 
 /// (封装层) 发起请求, 返回自定义对象时需要子类调用
 - (void)startRequest:(BRRequestBlock)requestBlock;
