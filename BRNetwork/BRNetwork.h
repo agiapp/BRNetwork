@@ -37,6 +37,8 @@ typedef NS_ENUM(NSUInteger, BRCachePolicy) {
     BRCachePolicyCacheOnly,
     /** 先从缓存获取数据，如果没有再获取网络数据，网络数据获取成功后更新本地缓存 */
     BRCachePolicyCacheElseNetwork,
+    /** 先从缓存获取数据，同时再获取网络数据并更新本地缓存，如果本地不存在缓存就返回网络获取的数据 */
+    BRCachePolicyCacheAndNetwork,
     /** 先从缓存读取数据，然后在从网络获取并且缓存，在这种情况下，Block将产生两次调用 */
     BRCachePolicyCacheThenNetwork
 };

@@ -17,7 +17,7 @@
 #import "AFNetworkActivityIndicatorManager.h"
 
 @implementation BRNetwork
-    
+
 static NSString *_baseUrl;
 static NSDictionary *_baseParameters; // 公共参数
 static NSDictionary *_encodeParameters; // 加密参数
@@ -46,15 +46,15 @@ static AFHTTPSessionManager *_sessionManager;
     _sessionManager = [AFHTTPSessionManager manager];
     // 配置响应序列化(设置请求接口回来的时候支持什么类型的数据,设置接收参数类型)
     _sessionManager.responseSerializer.acceptableContentTypes = [NSSet setWithObjects:@"application/json",
-                                                         @"text/html",
-                                                         @"text/json",
-                                                         @"text/plain",
-                                                         @"text/javascript",
-                                                         @"text/xml",
-                                                         @"image/*",
-                                                         @"application/octet-stream",
-                                                         @"application/zip",
-                                                         @"text/text", nil];
+                                                                 @"text/html",
+                                                                 @"text/json",
+                                                                 @"text/plain",
+                                                                 @"text/javascript",
+                                                                 @"text/xml",
+                                                                 @"image/*",
+                                                                 @"application/octet-stream",
+                                                                 @"application/zip",
+                                                                 @"text/text", nil];
     // 设置默认数据
     [self configDefaultData];
 }
@@ -258,6 +258,24 @@ static AFHTTPSessionManager *_sessionManager;
                     failureBlock ? failureBlock(error) : nil;
                 }];
             }
+        }];
+    } else if (cachePolicy == BRCachePolicyCacheAndNetwork) {
+        // 先从缓存读取数据
+        [BRCache getHttpCache:url params:params block:^(id<NSCoding> object) {
+            if (object) {
+                successBlock ? successBlock(object) : nil;
+            }
+            // 同时再从网络获取
+            [self requestWithMethod:method url:url params:params success:^(id responseObject) {
+                // 更新本地缓存
+                [BRCache saveHttpCache:responseObject url:url params:params];
+                // 如果本地不存在缓存，就获取网络数据
+                if (!object) {
+                    successBlock ? successBlock(responseObject) : nil;
+                }
+            } failure:^(NSError *error) {
+                failureBlock ? failureBlock(error) : nil;
+            }];
         }];
     } else if (cachePolicy == BRCachePolicyCacheThenNetwork) {
         // 先从缓存读取数据（这种情况successBlock调用两次）
