@@ -9,6 +9,12 @@
 #import <Foundation/Foundation.h>
 
 @interface BRCache : NSObject
+
+/**
+ *  设置缓存过期时间（单位：秒）
+ */
++ (void)setExpirationTime:(NSTimeInterval)expirationTime;
+
 /**
  *  缓存网络数据
  *

@@ -24,6 +24,10 @@ static NSArray *_filtrationCacheKey;
     _dataCache = [YYCache cacheWithName:httpCache];
 }
 
++ (void)setExpirationTime:(NSTimeInterval)expirationTime {
+    _dataCache.diskCache.ageLimit = expirationTime;
+}
+
 #pragma mark - 缓存网络数据
 + (void)saveHttpCache:(id)responseObj url:(NSString *)url params:(NSDictionary *)params {
     NSString *cacheKey = [self getCacheKey:url params:params];

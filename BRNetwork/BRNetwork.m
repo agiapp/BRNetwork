@@ -23,6 +23,7 @@ static NSDictionary *_baseParameters; // 公共参数
 static NSDictionary *_encodeParameters; // 加密参数
 static BOOL _isOpenLog;    // 是否开启日志打印
 static BOOL _isNeedEncry;  // 是否需要加密传输
+static BRCachePolicy _cachePolicy; // 缓存策略
 // 所有的请求task数组
 static NSMutableArray *_allSessionTask;
 static AFHTTPSessionManager *_sessionManager;
@@ -172,29 +173,42 @@ static AFHTTPSessionManager *_sessionManager;
     _sessionManager.securityPolicy = securitypolicy;
 }
 
+/** 设置接口数据缓存 */
++ (void)setCachePolicy:(BRCachePolicy)cachePolicy {
+    _cachePolicy = cachePolicy;
+}
+
+/**
+ *  设置接口数据缓存
+ *
+ *  @param cachePolicy 缓存策略
+ *  @param timeLimit   缓存过期时间（单位：秒）
+ */
++ (void)setCachePolicy:(BRCachePolicy)cachePolicy timeLimit:(NSTimeInterval)timeLimit {
+    _cachePolicy = cachePolicy;
+    [BRCache setExpirationTime:timeLimit];
+}
+
 #pragma mark - GET请求方法
 + (void)getWithUrl:(NSString *)url
             params:(NSDictionary *)params
-       cachePolicy:(BRCachePolicy)cachePolicy
            success:(BRHttpSuccessBlock)successBlock
            failure:(BRHttpFailureBlock)failureBlock {
-    [self requestWithMethod:BRRequestMethodGET url:url params:params cachePolicy:cachePolicy success:successBlock failure:failureBlock];
+    [self requestWithMethod:BRRequestMethodGET url:url params:params success:successBlock failure:failureBlock];
 }
 
 #pragma mark - POST请求方法
 + (void)postWithUrl:(NSString *)url
              params:(NSDictionary *)params
-        cachePolicy:(BRCachePolicy)cachePolicy
             success:(BRHttpSuccessBlock)successBlock
             failure:(BRHttpFailureBlock)failureBlock {
-    [self requestWithMethod:BRRequestMethodPOST url:url params:params cachePolicy:cachePolicy success:successBlock failure:failureBlock];
+    [self requestWithMethod:BRRequestMethodPOST url:url params:params success:successBlock failure:failureBlock];
 }
 
 #pragma mark - 网络请求公共方法
 + (void)requestWithMethod:(BRRequestMethod)method
                       url:(NSString *)url
                    params:(NSDictionary *)params
-              cachePolicy:(BRCachePolicy)cachePolicy
                   success:(BRHttpSuccessBlock)successBlock
                   failure:(BRHttpFailureBlock)failureBlock {
     if ((!url || ![url hasPrefix:@"http"]) && _baseUrl && _baseUrl.length > 0) {
@@ -215,18 +229,18 @@ static AFHTTPSessionManager *_sessionManager;
         NSLog(@"%@", url);
         NSLog(@"请求参数：%@", params);
     }
-    if (cachePolicy == BRCachePolicyNetworkOnly) {
-        [self requestWithMethod:method url:url params:params success:successBlock failure:failureBlock];
-    } else if (cachePolicy == BRCachePolicyNetworkAndSaveCache) {
-        [self requestWithMethod:method url:url params:params success:^(id responseObject) {
+    if (_cachePolicy == BRCachePolicyNetworkOnly) {
+        [self httpRequestWithMethod:method url:url params:params success:successBlock failure:failureBlock];
+    } else if (_cachePolicy == BRCachePolicyNetworkAndSaveCache) {
+        [self httpRequestWithMethod:method url:url params:params success:^(id responseObject) {
             // 更新缓存
             [BRCache saveHttpCache:responseObject url:url params:params];
             successBlock ? successBlock(responseObject) : nil;
         } failure:^(NSError *error) {
             failureBlock ? failureBlock(error) : nil;
         }];
-    } else if (cachePolicy == BRCachePolicyNetworkElseCache) {
-        [self requestWithMethod:method url:url params:params success:^(id responseObject) {
+    } else if (_cachePolicy == BRCachePolicyNetworkElseCache) {
+        [self httpRequestWithMethod:method url:url params:params success:^(id responseObject) {
             // 更新缓存
             [BRCache saveHttpCache:responseObject url:url params:params];
             successBlock ? successBlock(responseObject) : nil;
@@ -239,18 +253,18 @@ static AFHTTPSessionManager *_sessionManager;
                 }
             }];
         }];
-    } else if (cachePolicy == BRCachePolicyCacheOnly) {
+    } else if (_cachePolicy == BRCachePolicyCacheOnly) {
         [BRCache getHttpCache:url params:params block:^(id<NSCoding> object) {
             successBlock ? successBlock(object) : nil;
         }];
-    } else if (cachePolicy == BRCachePolicyCacheElseNetwork) {
+    } else if (_cachePolicy == BRCachePolicyCacheElseNetwork) {
         // 先从缓存读取数据
         [BRCache getHttpCache:url params:params block:^(id<NSCoding> object) {
             if (object) {
                 successBlock ? successBlock(object) : nil;
             } else {
                 // 如果没有缓存再从网络获取
-                [self requestWithMethod:method url:url params:params success:^(id responseObject) {
+                [self httpRequestWithMethod:method url:url params:params success:^(id responseObject) {
                     // 更新缓存
                     [BRCache saveHttpCache:responseObject url:url params:params];
                     successBlock ? successBlock(responseObject) : nil;
@@ -259,14 +273,14 @@ static AFHTTPSessionManager *_sessionManager;
                 }];
             }
         }];
-    } else if (cachePolicy == BRCachePolicyCacheAndNetwork) {
+    } else if (_cachePolicy == BRCachePolicyCacheAndNetwork) {
         // 先从缓存读取数据
         [BRCache getHttpCache:url params:params block:^(id<NSCoding> object) {
             if (object) {
                 successBlock ? successBlock(object) : nil;
             }
             // 同时再从网络获取
-            [self requestWithMethod:method url:url params:params success:^(id responseObject) {
+            [self httpRequestWithMethod:method url:url params:params success:^(id responseObject) {
                 // 更新本地缓存
                 [BRCache saveHttpCache:responseObject url:url params:params];
                 // 如果本地不存在缓存，就获取网络数据
@@ -277,14 +291,14 @@ static AFHTTPSessionManager *_sessionManager;
                 failureBlock ? failureBlock(error) : nil;
             }];
         }];
-    } else if (cachePolicy == BRCachePolicyCacheThenNetwork) {
+    } else if (_cachePolicy == BRCachePolicyCacheThenNetwork) {
         // 先从缓存读取数据（这种情况successBlock调用两次）
         [BRCache getHttpCache:url params:params block:^(id<NSCoding> object) {
             if (object) {
                 successBlock ? successBlock(object) : nil;
             }
             // 再从网络获取
-            [self requestWithMethod:method url:url params:params success:^(id responseObject) {
+            [self httpRequestWithMethod:method url:url params:params success:^(id responseObject) {
                 // 更新缓存
                 [BRCache saveHttpCache:responseObject url:url params:params];
                 successBlock ? successBlock(responseObject) : nil;
@@ -294,16 +308,16 @@ static AFHTTPSessionManager *_sessionManager;
         }];
     } else {
         // 未知缓存策略 (使用BRCachePolicyNetworkOnly)
-        [self requestWithMethod:method url:url params:params success:successBlock failure:failureBlock];
+        [self httpRequestWithMethod:method url:url params:params success:successBlock failure:failureBlock];
     }
 }
 
 #pragma mark - 网络请求处理
-+ (void)requestWithMethod:(BRRequestMethod)method
-                      url:(NSString *)url
-                   params:(NSDictionary *)params
-                  success:(BRHttpSuccessBlock)successBlock
-                  failure:(BRHttpFailureBlock)failureBlock {
++ (void)httpRequestWithMethod:(BRRequestMethod)method
+                          url:(NSString *)url
+                       params:(NSDictionary *)params
+                      success:(BRHttpSuccessBlock)successBlock
+                      failure:(BRHttpFailureBlock)failureBlock {
     [self dataTaskWithMethod:method url:url params:params success:^(NSURLSessionDataTask * _Nonnull task, id _Nullable responseObject) {
         // 响应序列化类型是HTTP时，请求结果输出的是二进制数据
         if (![NSJSONSerialization isValidJSONObject:responseObject]) {
@@ -355,7 +369,7 @@ static AFHTTPSessionManager *_sessionManager;
         sessionTask = [_sessionManager GET:url parameters:params progress:nil success:success failure:failure];
     }
     
-    //添加最新的sessionTask到数组
+    // 添加最新的sessionTask到数组
     sessionTask ? [[self allSessionTask] addObject:sessionTask] : nil;
 }
 
