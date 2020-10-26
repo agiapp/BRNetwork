@@ -16,13 +16,29 @@
 // 电池条上网络活动提示(菊花转动)
 #import "AFNetworkActivityIndicatorManager.h"
 
+
+#ifdef __OBJC__
+
+// 日志输出宏定义
+#ifdef DEBUG
+// 调试状态
+#define BRLog(FORMAT, ...) fprintf(stderr, "%s:[第%d行]\t%s\n", [[[NSString stringWithUTF8String: __FILE__] lastPathComponent] UTF8String], __LINE__, [[NSString stringWithFormat: FORMAT, ## __VA_ARGS__] UTF8String]);
+#else
+// 发布状态
+#define BRLog(...)
+#endif
+
+#endif
+
+
 @implementation BRNetwork
 
 static NSString *_baseUrl;
-static NSDictionary *_baseParameters; // 公共参数
+static NSDictionary *_baseParameters;   // 公共参数
 static NSDictionary *_encodeParameters; // 加密参数
-static BOOL _isOpenLog;    // 是否开启日志打印
-static BOOL _isNeedEncry;  // 是否需要加密传输
+static BOOL _isOpenLog;       // 是否开启日志打印
+static NSString *_logString;  // 日志字符串
+static BOOL _isNeedEncry;     // 是否需要加密传输
 static BRCachePolicy _cachePolicy; // 缓存策略
 // 所有的请求task数组
 static NSMutableArray *_allSessionTask;
@@ -104,7 +120,10 @@ static AFHTTPSessionManager *_sessionManager;
 }
 
 #pragma mark - 设置请求头（额外的HTTP请求头字段，这里可以给请求头添加加密键值对，即加密header/签名）
-+ (void)setRequestHeaderFieldValueDictionary:(NSDictionary *)dic; {
++ (void)setRequestHeaderFieldValueDictionary:(NSDictionary *)dic {
+    if (_isOpenLog) {
+        _logString = [NSString stringWithFormat:@"【请求头】：%@\n", dic];
+    }
     if (dic && dic.count > 0) {
         for (NSString *key in dic.allKeys) {
             [_sessionManager.requestSerializer setValue:dic[key] forHTTPHeaderField:key];
@@ -211,7 +230,7 @@ static AFHTTPSessionManager *_sessionManager;
                    params:(NSDictionary *)params
                   success:(BRHttpSuccessBlock)successBlock
                   failure:(BRHttpFailureBlock)failureBlock {
-    if ((!url || ![url hasPrefix:@"http"]) && _baseUrl && _baseUrl.length > 0) {
+    if (!(url && [url hasPrefix:@"http"]) && _baseUrl && _baseUrl.length > 0) {
         // 获取完整的url路径
         url = [NSString stringWithFormat:@"%@%@", _baseUrl, url];
     }
@@ -225,9 +244,7 @@ static AFHTTPSessionManager *_sessionManager;
         params = _encodeParameters;
     }
     if (_isOpenLog) {
-        NSLog(@"---------------- start ------------------");
-        NSLog(@"%@", url);
-        NSLog(@"请求参数：%@", params);
+        _logString = [NSString stringWithFormat:@"[%@]\n%@【请求参数】：%@\n", url, _logString, params];
     }
     if (_cachePolicy == BRCachePolicyNetworkOnly) {
         [self httpRequestWithMethod:method url:url params:params success:successBlock failure:failureBlock];
@@ -247,20 +264,24 @@ static AFHTTPSessionManager *_sessionManager;
         } failure:^(NSError *error) {
             [BRCache getHttpCache:url params:params block:^(id<NSCoding> object) {
                 if (object) {
+                    if (_isOpenLog) BRLog(@"%@", [NSString stringWithFormat:@"%@【缓存内容】：%@\n\n-------------------------------------------------\n\n", _logString, object]);
                     successBlock ? successBlock(object) : nil;
                 } else {
+                    if (_isOpenLog) BRLog(@"%@", [NSString stringWithFormat:@"%@【缓存内容】：%@\n\n-------------------------------------------------\n\n", _logString, object]);
                     failureBlock ? failureBlock(error) : nil;
                 }
             }];
         }];
     } else if (_cachePolicy == BRCachePolicyCacheOnly) {
         [BRCache getHttpCache:url params:params block:^(id<NSCoding> object) {
+            if (_isOpenLog) BRLog(@"%@", [NSString stringWithFormat:@"%@【缓存内容】：%@\n\n-------------------------------------------------\n\n", _logString, object]);
             successBlock ? successBlock(object) : nil;
         }];
     } else if (_cachePolicy == BRCachePolicyCacheElseNetwork) {
         // 先从缓存读取数据
         [BRCache getHttpCache:url params:params block:^(id<NSCoding> object) {
             if (object) {
+                if (_isOpenLog) BRLog(@"%@", [NSString stringWithFormat:@"%@【缓存内容】：%@\n\n-------------------------------------------------\n\n", _logString, object]);
                 successBlock ? successBlock(object) : nil;
             } else {
                 // 如果没有缓存再从网络获取
@@ -277,6 +298,7 @@ static AFHTTPSessionManager *_sessionManager;
         // 先从缓存读取数据
         [BRCache getHttpCache:url params:params block:^(id<NSCoding> object) {
             if (object) {
+                if (_isOpenLog) BRLog(@"%@", [NSString stringWithFormat:@"%@【缓存内容】：%@\n\n-------------------------------------------------\n\n", _logString, object]);
                 successBlock ? successBlock(object) : nil;
             }
             // 同时再从网络获取
@@ -295,6 +317,7 @@ static AFHTTPSessionManager *_sessionManager;
         // 先从缓存读取数据（这种情况successBlock调用两次）
         [BRCache getHttpCache:url params:params block:^(id<NSCoding> object) {
             if (object) {
+                if (_isOpenLog) BRLog(@"%@", [NSString stringWithFormat:@"%@【缓存内容】：%@\n\n-------------------------------------------------\n\n", _logString, object]);
                 successBlock ? successBlock(object) : nil;
             }
             // 再从网络获取
@@ -330,17 +353,11 @@ static AFHTTPSessionManager *_sessionManager;
                 responseObject = obj;
             }
         }
-        if (_isOpenLog) {
-            NSLog(@"请求成功：%@", responseObject);
-            NSLog(@"----------------- end -------------------");
-        }
+        if (_isOpenLog) BRLog(@"%@", [NSString stringWithFormat:@"%@【请求成功】：%@\n\n-------------------------------------------------\n\n", _logString, responseObject]);
         [[self allSessionTask] removeObject:task];
         successBlock ? successBlock(responseObject) : nil;
     } failure:^(NSURLSessionDataTask * _Nullable task, NSError * _Nonnull error) {
-        if (_isOpenLog) {
-            NSLog(@"请求失败：%@", error);
-            NSLog(@"----------------- end -------------------");
-        }
+        if (_isOpenLog) BRLog(@"%@", [NSString stringWithFormat:@"%@【请求失败】：%@\n\n-------------------------------------------------\n\n", _logString, error]);
         failureBlock ? failureBlock(error) : nil;
         [[self allSessionTask] removeObject:task];
     }];

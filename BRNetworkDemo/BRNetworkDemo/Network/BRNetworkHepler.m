@@ -24,7 +24,7 @@
            success:(BRRequestSuccess)successBlock
            failure:(BRRequestFailure)failureBlock {
     [self configRequest];
-    [BRNetwork requestWithMethod:BRRequestMethodGET url:url params:params cachePolicy:BRCachePolicyCacheThenNetwork success:^(id responseObject) {
+    [BRNetwork requestWithMethod:BRRequestMethodGET url:url params:params success:^(id responseObject) {
         successBlock ? successBlock(responseObject, nil) : nil;
     } failure:^(NSError *error) {
         failureBlock ? failureBlock(error, nil) : nil;
@@ -36,7 +36,7 @@
             success:(BRRequestSuccess)successBlock
             failure:(BRRequestFailure)failureBlock {
     [self configRequest];
-    [BRNetwork requestWithMethod:BRRequestMethodPOST url:url params:params cachePolicy:BRCachePolicyCacheThenNetwork success:^(id responseObject) {
+    [BRNetwork requestWithMethod:BRRequestMethodPOST url:url params:params success:^(id responseObject) {
         successBlock ? successBlock(responseObject, nil) : nil;
     } failure:^(NSError *error) {
         failureBlock ? failureBlock(error, nil) : nil;
