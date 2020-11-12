@@ -16,6 +16,13 @@
 // 电池条上网络活动提示(菊花转动)
 #import "AFNetworkActivityIndicatorManager.h"
 
+#ifdef __OBJC__
+
+// 日志输出宏定义
+#define BRApiLog(FORMAT, ...) fprintf(stderr, "%s:[第%d行]\t%s\n", [[[NSString stringWithUTF8String: __FILE__] lastPathComponent] UTF8String], __LINE__, [[NSString stringWithFormat: FORMAT, ## __VA_ARGS__] UTF8String]);
+
+#endif
+
 @implementation BRNetwork
 
 // 以下变量是公共配置，不支持二次修改
@@ -211,11 +218,6 @@ static AFHTTPSessionManager *_sessionManager;
     if (_isNeedEncry && _encodeParameters.count > 0) {
         params = _encodeParameters;
     }
-    if (_isOpenLog) {
-        NSLog(@"---------------- start ------------------");
-        NSLog(@"%@", url);
-        NSLog(@"请求参数：%@", params);
-    }
     if (cachePolicy == BRCachePolicyNetworkOnly) {
         [self requestWithMethod:method url:url params:params success:successBlock failure:failureBlock];
     } else if (cachePolicy == BRCachePolicyNetworkAndSaveCache) {
@@ -232,7 +234,7 @@ static AFHTTPSessionManager *_sessionManager;
             [BRCache saveHttpCache:responseObject url:url params:params];
             successBlock ? successBlock(responseObject) : nil;
         } failure:^(NSError *error) {
-            [BRCache getHttpCache:url params:params block:^(id<NSCoding> object) {
+            [self getHttpCache:url params:params resultBlock:^(id<NSCoding> object) {
                 if (object) {
                     successBlock ? successBlock(object) : nil;
                 } else {
@@ -241,12 +243,12 @@ static AFHTTPSessionManager *_sessionManager;
             }];
         }];
     } else if (cachePolicy == BRCachePolicyCacheOnly) {
-        [BRCache getHttpCache:url params:params block:^(id<NSCoding> object) {
+        [self getHttpCache:url params:params resultBlock:^(id<NSCoding> object) {
             successBlock ? successBlock(object) : nil;
         }];
     } else if (cachePolicy == BRCachePolicyCacheElseNetwork) {
         // 先从缓存读取数据
-        [BRCache getHttpCache:url params:params block:^(id<NSCoding> object) {
+        [self getHttpCache:url params:params resultBlock:^(id<NSCoding> object) {
             if (object) {
                 successBlock ? successBlock(object) : nil;
             } else {
@@ -262,7 +264,7 @@ static AFHTTPSessionManager *_sessionManager;
         }];
     } else if (cachePolicy == BRCachePolicyCacheAndNetwork) {
         // 先从缓存读取数据
-        [BRCache getHttpCache:url params:params block:^(id<NSCoding> object) {
+        [self getHttpCache:url params:params resultBlock:^(id<NSCoding> object) {
             if (object) {
                 successBlock ? successBlock(object) : nil;
             }
@@ -280,7 +282,7 @@ static AFHTTPSessionManager *_sessionManager;
         }];
     } else if (cachePolicy == BRCachePolicyCacheThenNetwork) {
         // 先从缓存读取数据（这种情况successBlock调用两次）
-        [BRCache getHttpCache:url params:params block:^(id<NSCoding> object) {
+        [self getHttpCache:url params:params resultBlock:^(id<NSCoding> object) {
             if (object) {
                 successBlock ? successBlock(object) : nil;
             }
@@ -312,24 +314,26 @@ static AFHTTPSessionManager *_sessionManager;
             // 将二进制数据序列化成JSON数据
             id obj = [NSJSONSerialization JSONObjectWithData:responseObject options:NSJSONReadingMutableContainers error:&error];
             if (error) {
-                NSLog(@"二进制数据序列化成JSON数据失败：%@", error);
+                if (_isOpenLog) BRApiLog(@"二进制数据序列化成JSON数据失败：%@", error);
             } else {
                 responseObject = obj;
             }
         }
-        if (_isOpenLog) {
-            NSLog(@"请求成功：%@", responseObject);
-            NSLog(@"----------------- end -------------------");
-        }
+        if (_isOpenLog) BRApiLog(@"url:%@\nheader：\n%@\nparams：\n%@\nsuccess：\n%@\n\n", url, _sessionManager.requestSerializer.HTTPRequestHeaders, params, responseObject);
         [[self allSessionTask] removeObject:task];
         successBlock ? successBlock(responseObject) : nil;
     } failure:^(NSURLSessionDataTask * _Nullable task, NSError * _Nonnull error) {
-        if (_isOpenLog) {
-            NSLog(@"请求失败：%@", error);
-            NSLog(@"----------------- end -------------------");
-        }
+        if (_isOpenLog) BRApiLog(@"url:%@\nheader：\n%@\nparams：\n%@\nfailure：\n%@\n\n", url, _sessionManager.requestSerializer.HTTPRequestHeaders, params, error);
         failureBlock ? failureBlock(error) : nil;
         [[self allSessionTask] removeObject:task];
+    }];
+}
+
+#pragma mark - 异步 获取缓存的数据
++ (void)getHttpCache:(NSString *)url params:(NSDictionary *)params resultBlock:(void(^)(id<NSCoding> object))resultBlock {
+    [BRCache getHttpCache:url params:params block:^(id<NSCoding> object) {
+        if (_isOpenLog) BRApiLog(@"url:%@\nheader：\n%@\nparams：\n%@\ncache：\n%@\n\n", url, _sessionManager.requestSerializer.HTTPRequestHeaders, params, object);
+        resultBlock(object);
     }];
 }
 
@@ -371,7 +375,7 @@ static AFHTTPSessionManager *_sessionManager;
         // 下载进度
         // progress.completedUnitCount: 当前大小;
         // Progress.totalUnitCount: 总大小
-        if (_isOpenLog) NSLog(@"下载进度：%.2f%%",100.0 * downloadProgress.completedUnitCount / downloadProgress.totalUnitCount);
+        if (_isOpenLog) BRApiLog(@"下载进度：%.2f%%",100.0 * downloadProgress.completedUnitCount / downloadProgress.totalUnitCount);
         progress ? progress(downloadProgress) : nil;
     } destination:^NSURL *(NSURL *targetPath, NSURLResponse *response) {
         // 下载完后，实际下载在临时文件夹里；在这里需要保存到本地缓存文件夹里
@@ -509,19 +513,19 @@ static AFHTTPSessionManager *_sessionManager;
             // 当网络状态改变了, 就会调用这个block
             switch (status) {
                 case AFNetworkReachabilityStatusUnknown:
-                    if (_isOpenLog) NSLog(@"当前网络未知");
+                    if (_isOpenLog) BRApiLog(@"当前网络未知");
                     networkStatusBlock ? networkStatusBlock(BRNetworkStatusUnknown) : nil;
                     break;
                 case AFNetworkReachabilityStatusNotReachable:
-                    if (_isOpenLog) NSLog(@"当前无网络");
+                    if (_isOpenLog) BRApiLog(@"当前无网络");
                     networkStatusBlock ? networkStatusBlock(BRNetworkStatusNotReachable) : nil;
                     break;
                 case AFNetworkReachabilityStatusReachableViaWWAN:
-                    if (_isOpenLog) NSLog(@"当前是蜂窝网络");
+                    if (_isOpenLog) BRApiLog(@"当前是蜂窝网络");
                     networkStatusBlock ? networkStatusBlock(BRNetworkStatusReachableViaWWAN) : nil;
                     break;
                 case AFNetworkReachabilityStatusReachableViaWiFi:
-                    if (_isOpenLog) NSLog(@"当前是wifi环境");
+                    if (_isOpenLog) BRApiLog(@"当前是wifi环境");
                     networkStatusBlock ? networkStatusBlock(BRNetworkStatusReachableViaWiFi) : nil;
                     break;
                 default:
