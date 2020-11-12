@@ -116,30 +116,17 @@ typedef void(^BRNetworkStatusBlock)(BRNetworkStatus status);
 + (void)setSecurityPolicyWithCerPath:(NSString *)cerPath validatesDomainName:(BOOL)validatesDomainName;
 
 /**
- *  设置接口数据缓存
- *
- *  @param cachePolicy 缓存策略
- */
-+ (void)setCachePolicy:(BRCachePolicy)cachePolicy;
-
-/**
- *  设置接口数据缓存（带缓存时长）
- *
- *  @param cachePolicy 缓存策略
- *  @param timeLimit   缓存过期时间（单位：秒）
- */
-+ (void)setCachePolicy:(BRCachePolicy)cachePolicy timeLimit:(NSTimeInterval)timeLimit;
-
-/**
  *  GET请求方法
  *
  *  @param url 请求地址
  *  @param params 请求参数
+ *  @param cachePolicy 缓存策略
  *  @param successBlock 请求成功的回调
  *  @param failureBlock 请求失败的回调
  */
 + (void)getWithUrl:(NSString *)url
             params:(NSDictionary *)params
+       cachePolicy:(BRCachePolicy)cachePolicy
            success:(BRHttpSuccessBlock)successBlock
            failure:(BRHttpFailureBlock)failureBlock;
 
@@ -148,13 +135,15 @@ typedef void(^BRNetworkStatusBlock)(BRNetworkStatus status);
  *
  *  @param url 请求地址
  *  @param params 请求参数
+ *  @param cachePolicy 缓存策略
  *  @param successBlock 请求成功的回调
  *  @param failureBlock 请求失败的回调
  */
 + (void)postWithUrl:(NSString *)url
-             params:(NSDictionary *)params
-            success:(BRHttpSuccessBlock)successBlock
-            failure:(BRHttpFailureBlock)failureBlock;
+            params:(NSDictionary *)params
+       cachePolicy:(BRCachePolicy)cachePolicy
+           success:(BRHttpSuccessBlock)successBlock
+           failure:(BRHttpFailureBlock)failureBlock;
 
 /**
  *  网络请求方法
@@ -162,12 +151,14 @@ typedef void(^BRNetworkStatusBlock)(BRNetworkStatus status);
  *  @param method 请求方法
  *  @param url 请求地址
  *  @param params 请求参数
+ *  @param cachePolicy 缓存策略
  *  @param successBlock 请求成功的回调
  *  @param failureBlock 请求失败的回调
  */
 + (void)requestWithMethod:(BRRequestMethod)method
                       url:(NSString *)url
                    params:(NSDictionary *)params
+              cachePolicy:(BRCachePolicy)cachePolicy
                   success:(BRHttpSuccessBlock)successBlock
                   failure:(BRHttpFailureBlock)failureBlock;
 
