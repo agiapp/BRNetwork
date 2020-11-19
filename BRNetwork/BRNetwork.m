@@ -79,8 +79,8 @@ static AFHTTPSessionManager *_sessionManager;
     _sessionManager.requestSerializer.timeoutInterval = 30;
     // 打开状态栏菊花
     [AFNetworkActivityIndicatorManager sharedManager].enabled = YES;
-    // 打开日志
-    _isOpenLog = YES;
+    // 默认关闭日志
+    _isOpenLog = NO;
     // 默认不加密传输
     _isNeedEncry = NO;
 }
@@ -319,11 +319,11 @@ static AFHTTPSessionManager *_sessionManager;
                 responseObject = obj;
             }
         }
-        if (_isOpenLog) BRApiLog(@"url:%@\nheader：\n%@\nparams：\n%@\nsuccess：\n%@\n\n", url, _sessionManager.requestSerializer.HTTPRequestHeaders, params, responseObject);
+        if (_isOpenLog) BRApiLog(@"\nurl：%@\nheader：\n%@\nparams：\n%@\nsuccess：\n%@\n\n", url, _sessionManager.requestSerializer.HTTPRequestHeaders, params, responseObject);
         [[self allSessionTask] removeObject:task];
         successBlock ? successBlock(responseObject) : nil;
     } failure:^(NSURLSessionDataTask * _Nullable task, NSError * _Nonnull error) {
-        if (_isOpenLog) BRApiLog(@"url:%@\nheader：\n%@\nparams：\n%@\nfailure：\n%@\n\n", url, _sessionManager.requestSerializer.HTTPRequestHeaders, params, error);
+        if (_isOpenLog) BRApiLog(@"\nurl：%@\nheader：\n%@\nparams：\n%@\nfailure：\n%@\n\n", url, _sessionManager.requestSerializer.HTTPRequestHeaders, params, error);
         failureBlock ? failureBlock(error) : nil;
         [[self allSessionTask] removeObject:task];
     }];
@@ -332,7 +332,7 @@ static AFHTTPSessionManager *_sessionManager;
 #pragma mark - 异步 获取缓存的数据
 + (void)getHttpCache:(NSString *)url params:(NSDictionary *)params resultBlock:(void(^)(id<NSCoding> object))resultBlock {
     [BRCache getHttpCache:url params:params block:^(id<NSCoding> object) {
-        if (_isOpenLog) BRApiLog(@"url:%@\nheader：\n%@\nparams：\n%@\ncache：\n%@\n\n", url, _sessionManager.requestSerializer.HTTPRequestHeaders, params, object);
+        if (_isOpenLog) BRApiLog(@"\nurl：%@\nheader：\n%@\nparams：\n%@\ncache：\n%@\n\n", url, _sessionManager.requestSerializer.HTTPRequestHeaders, params, object);
         resultBlock(object);
     }];
 }
