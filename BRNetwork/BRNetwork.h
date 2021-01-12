@@ -72,31 +72,31 @@ typedef NS_ENUM(NSUInteger, BRResponseSerializer) {
 };
 
 /** 成功的回调 */
-typedef void (^BRHttpSuccessBlock)(id responseObject);
+typedef void (^BRHttpSuccessBlock)(id _Nullable responseObject);
 /** 失败的回调 */
 typedef void (^BRHttpFailureBlock)(NSError *error);
 /** 网络状态Block */
 typedef void(^BRNetworkStatusBlock)(BRNetworkStatus status);
 
+
+NS_ASSUME_NONNULL_BEGIN
+
 @interface BRNetwork : NSObject
 
 /** 设置接口根路径 */
-+ (void)setBaseUrl:(NSString *)baseUrl;
++ (void)setBaseUrl:(nullable NSString *)baseUrl;
 
 /** 设置接口基本参数/公共参数(如:用户ID, Token) */
-+ (void)setBaseParameters:(NSDictionary *)params;
++ (void)setBaseParameters:(nullable NSDictionary *)params;
 
 /** 加密接口参数/加密Body */
-+ (void)setEncodeParameters:(NSDictionary *)params;
++ (void)setEncodeParameters:(nullable NSDictionary *)params;
 
 /** 是否开启日志打印 */
 + (void)setIsOpenLog:(BOOL)isOpenLog;
 
 /** 是否需要加密传输 */
 + (void)setIsNeedEncry:(BOOL)isNeedEncry;
-
-/** 设置请求头（额外的HTTP请求头字段） */
-+ (void)setRequestHeaderFieldValueDictionary:(NSDictionary *)dic;
 
 /** 设置请求超时时间(默认30s) */
 + (void)setRequestTimeoutInterval:(NSTimeInterval)timeout;
@@ -120,30 +120,34 @@ typedef void(^BRNetworkStatusBlock)(BRNetworkStatus status);
  *
  *  @param url 请求地址
  *  @param params 请求参数
+ *  @param headers 请求头
  *  @param cachePolicy 缓存策略
  *  @param successBlock 请求成功的回调
  *  @param failureBlock 请求失败的回调
  */
 + (void)getWithUrl:(NSString *)url
-            params:(NSDictionary *)params
+            params:(nullable NSDictionary *)params
+           headers:(nullable NSDictionary *)headers
        cachePolicy:(BRCachePolicy)cachePolicy
-           success:(BRHttpSuccessBlock)successBlock
-           failure:(BRHttpFailureBlock)failureBlock;
+           success:(nullable BRHttpSuccessBlock)successBlock
+           failure:(nullable BRHttpFailureBlock)failureBlock;
 
 /**
  *  POST请求方法
  *
  *  @param url 请求地址
  *  @param params 请求参数
+ *  @param headers 请求头
  *  @param cachePolicy 缓存策略
  *  @param successBlock 请求成功的回调
  *  @param failureBlock 请求失败的回调
  */
 + (void)postWithUrl:(NSString *)url
-            params:(NSDictionary *)params
+            params:(nullable NSDictionary *)params
+           headers:(nullable NSDictionary *)headers
        cachePolicy:(BRCachePolicy)cachePolicy
-           success:(BRHttpSuccessBlock)successBlock
-           failure:(BRHttpFailureBlock)failureBlock;
+           success:(nullable BRHttpSuccessBlock)successBlock
+           failure:(nullable BRHttpFailureBlock)failureBlock;
 
 /**
  *  网络请求方法
@@ -151,16 +155,18 @@ typedef void(^BRNetworkStatusBlock)(BRNetworkStatus status);
  *  @param method 请求方法
  *  @param url 请求地址
  *  @param params 请求参数
+ *  @param headers 请求头
  *  @param cachePolicy 缓存策略
  *  @param successBlock 请求成功的回调
  *  @param failureBlock 请求失败的回调
  */
 + (void)requestWithMethod:(BRRequestMethod)method
                       url:(NSString *)url
-                   params:(NSDictionary *)params
+                   params:(nullable NSDictionary *)params
+                  headers:(nullable NSDictionary *)headers
               cachePolicy:(BRCachePolicy)cachePolicy
-                  success:(BRHttpSuccessBlock)successBlock
-                  failure:(BRHttpFailureBlock)failureBlock;
+                  success:(nullable BRHttpSuccessBlock)successBlock
+                  failure:(nullable BRHttpFailureBlock)failureBlock;
 
 /**
  *  下载文件
@@ -173,9 +179,9 @@ typedef void(^BRNetworkStatusBlock)(BRNetworkStatus status);
  */
 
 + (void)downloadFileWithUrl:(NSString *)url
-                   progress:(void(^)(NSProgress *progress))progress
-                    success:(void(^)(NSString *filePath))success
-                    failure:(void(^)(NSError *error))failure;
+                   progress:(nullable void(^)(NSProgress *progress))progress
+                    success:(nullable void(^)(NSString *filePath))success
+                    failure:(nullable void(^)(NSError *error))failure;
 
 
 /**
@@ -191,12 +197,12 @@ typedef void(^BRNetworkStatusBlock)(BRNetworkStatus status);
  *
  */
 + (void)uploadFileWithUrl:(NSString *)Url
-                   params:(id)params
-                  nameKey:(NSString *)nameKey
-                 filePath:(NSString *)filePath
-                 progress:(void(^)(NSProgress *progress))progress
-                  success:(void(^)(id responseObject))success
-                  failure:(void(^)(NSError *error))failure;
+                   params:(nullable id)params
+                  nameKey:(nullable NSString *)nameKey
+                 filePath:(nullable NSString *)filePath
+                 progress:(nullable void(^)(NSProgress *progress))progress
+                  success:(nullable void(^)(id responseObject))success
+                  failure:(nullable void(^)(NSError *error))failure;
 
 /**
  *  上传单/多张图片
@@ -214,15 +220,15 @@ typedef void(^BRNetworkStatusBlock)(BRNetworkStatus status);
  *
  */
 + (void)uploadImagesWithUrl:(NSString *)Url
-                     params:(id)params
-                    nameKey:(NSString *)nameKey
-                     images:(NSArray<UIImage *> *)images
-                  fileNames:(NSArray<NSString *> *)fileNames
+                     params:(nullable id)params
+                    nameKey:(nullable NSString *)nameKey
+                     images:(nullable NSArray<UIImage *> *)images
+                  fileNames:(nullable NSArray<NSString *> *)fileNames
                  imageScale:(CGFloat)imageScale
-                  imageType:(NSString *)imageType
-                   progress:(void(^)(NSProgress *progress))progress
-                    success:(void(^)(id responseObject))success
-                    failure:(void(^)(NSError *error))failure;
+                  imageType:(nullable NSString *)imageType
+                   progress:(nullable void(^)(NSProgress *progress))progress
+                    success:(nullable void(^)(id responseObject))success
+                    failure:(nullable void(^)(NSError *error))failure;
 
 /** 取消所有Http请求 */
 + (void)cancelAllRequest;
@@ -246,3 +252,5 @@ typedef void(^BRNetworkStatusBlock)(BRNetworkStatus status);
 + (BOOL)isWiFiNetwork;
 
 @end
+
+NS_ASSUME_NONNULL_END
