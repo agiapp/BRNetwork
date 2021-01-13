@@ -22,11 +22,13 @@ typedef void (^BRRequestFailure)(NSError *error, NSString *message);
  *
  *  @param url 请求地址
  *  @param params 请求参数
+ *  @param headers 请求头
  *  @param successBlock 请求成功的回调
  *  @param failureBlock 请求失败的回调
  */
 + (void)getWithUrl:(NSString *)url
             params:(NSDictionary *)params
+           headers:(NSDictionary *)headers
            success:(BRRequestSuccess)successBlock
            failure:(BRRequestFailure)failureBlock;
 
@@ -35,11 +37,13 @@ typedef void (^BRRequestFailure)(NSError *error, NSString *message);
  *
  *  @param url 请求地址
  *  @param params 请求参数
+ *  @param headers 请求头
  *  @param successBlock 请求成功的回调
  *  @param failureBlock 请求失败的回调
  */
 + (void)postWithUrl:(NSString *)url
              params:(NSDictionary *)params
+            headers:(NSDictionary *)headers
             success:(BRRequestSuccess)successBlock
             failure:(BRRequestFailure)failureBlock;
 

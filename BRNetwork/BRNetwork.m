@@ -334,7 +334,7 @@ static AFHTTPSessionManager *_sessionManager;
 }
 
 #pragma mark - 异步 获取缓存的数据
-+ (void)getHttpCache:(NSString *)url params:(NSDictionary *)params headers:(NSDictionary *)headers resultBlock:(void(^)(id<NSCoding> object))resultBlock {
++ (void)getHttpCache:(NSString *)url params:(nullable NSDictionary *)params headers:(nullable NSDictionary *)headers resultBlock:(nullable void (^)(id<NSCoding> object))resultBlock {
     [BRCache getHttpCache:url params:params block:^(id<NSCoding> object) {
         if (_isOpenLog) BRApiLog(@"\nurl：%@\nheader：\n%@\nparams：\n%@\ncache：\n%@\n\n", url, headers, params, object);
         resultBlock(object);
@@ -344,10 +344,10 @@ static AFHTTPSessionManager *_sessionManager;
 #pragma mark - 请求任务
 + (void)dataTaskWithMethod:(BRRequestMethod)method
                        url:(NSString *)url
-                    params:(NSDictionary *)params
+                    params:(nullable NSDictionary *)params
                    headers:(nullable NSDictionary <NSString *, NSString *> *)headers
-                   success:(void (^)(NSURLSessionDataTask * _Nonnull, id _Nullable))success
-                   failure:(void (^)(NSURLSessionDataTask * _Nullable, NSError * _Nonnull))failure {
+                   success:(nullable void (^)(NSURLSessionDataTask * _Nonnull task, id _Nullable responseObject))success
+                   failure:(nullable void (^)(NSURLSessionDataTask * _Nullable task, NSError * _Nonnull error))failure {
     NSURLSessionTask *sessionTask = nil;
     if (method == BRRequestMethodGET) {
         sessionTask = [_sessionManager GET:url parameters:params headers:headers progress:nil success:success failure:failure];
@@ -426,7 +426,7 @@ static AFHTTPSessionManager *_sessionManager;
     } progress:^(NSProgress * _Nonnull uploadProgress) {
         //上传进度
         progress ? progress(uploadProgress) : nil;
-    } success:^(NSURLSessionDataTask * _Nonnull task, id  _Nullable responseObject) {
+    } success:^(NSURLSessionDataTask * _Nonnull task, id _Nullable responseObject) {
         [[self allSessionTask] removeObject:task];
         success ? success(responseObject) : nil;
     } failure:^(NSURLSessionDataTask * _Nullable task, NSError * _Nonnull error) {

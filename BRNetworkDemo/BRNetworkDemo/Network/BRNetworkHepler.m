@@ -21,10 +21,11 @@
 
 + (void)getWithUrl:(NSString *)url
             params:(NSDictionary *)params
+           headers:(NSDictionary *)headers
            success:(BRRequestSuccess)successBlock
            failure:(BRRequestFailure)failureBlock {
     [self configRequest];
-    [BRNetwork requestWithMethod:BRRequestMethodGET url:url params:params cachePolicy:BRCachePolicyNetworkOnly success:^(id responseObject) {
+    [BRNetwork requestWithMethod:BRRequestMethodGET url:url params:params headers:headers cachePolicy:BRCachePolicyNetworkOnly success:^(id responseObject) {
         successBlock ? successBlock(responseObject, nil) : nil;
     } failure:^(NSError *error) {
         failureBlock ? failureBlock(error, nil) : nil;
@@ -33,10 +34,11 @@
 
 + (void)postWithUrl:(NSString *)url
              params:(NSDictionary *)params
+            headers:(NSDictionary *)headers
             success:(BRRequestSuccess)successBlock
             failure:(BRRequestFailure)failureBlock {
     [self configRequest];
-    [BRNetwork requestWithMethod:BRRequestMethodPOST url:url params:params cachePolicy:BRCachePolicyNetworkOnly success:^(id responseObject) {
+    [BRNetwork requestWithMethod:BRRequestMethodPOST url:url params:params headers:headers cachePolicy:BRCachePolicyNetworkOnly success:^(id responseObject) {
         successBlock ? successBlock(responseObject, nil) : nil;
     } failure:^(NSError *error) {
         failureBlock ? failureBlock(error, nil) : nil;

@@ -74,7 +74,7 @@ typedef NS_ENUM(NSUInteger, BRResponseSerializer) {
 /** 成功的回调 */
 typedef void (^BRHttpSuccessBlock)(id _Nullable responseObject);
 /** 失败的回调 */
-typedef void (^BRHttpFailureBlock)(NSError *error);
+typedef void (^BRHttpFailureBlock)(NSError * _Nonnull error);
 /** 网络状态Block */
 typedef void(^BRNetworkStatusBlock)(BRNetworkStatus status);
 
@@ -180,8 +180,8 @@ NS_ASSUME_NONNULL_BEGIN
 
 + (void)downloadFileWithUrl:(NSString *)url
                    progress:(nullable void(^)(NSProgress *progress))progress
-                    success:(nullable void(^)(NSString *filePath))success
-                    failure:(nullable void(^)(NSError *error))failure;
+                    success:(nullable void(^)(NSString * _Nullable filePath))success
+                    failure:(nullable void(^)(NSError * _Nullable error))failure;
 
 
 /**
@@ -200,9 +200,9 @@ NS_ASSUME_NONNULL_BEGIN
                    params:(nullable id)params
                   nameKey:(nullable NSString *)nameKey
                  filePath:(nullable NSString *)filePath
-                 progress:(nullable void(^)(NSProgress *progress))progress
-                  success:(nullable void(^)(id responseObject))success
-                  failure:(nullable void(^)(NSError *error))failure;
+                 progress:(nullable void(^)(NSProgress * _Nonnull progress))progress
+                  success:(nullable void(^)(id _Nullable responseObject))success
+                  failure:(nullable void(^)(NSError * _Nonnull error))failure;
 
 /**
  *  上传单/多张图片
@@ -226,9 +226,9 @@ NS_ASSUME_NONNULL_BEGIN
                   fileNames:(nullable NSArray<NSString *> *)fileNames
                  imageScale:(CGFloat)imageScale
                   imageType:(nullable NSString *)imageType
-                   progress:(nullable void(^)(NSProgress *progress))progress
-                    success:(nullable void(^)(id responseObject))success
-                    failure:(nullable void(^)(NSError *error))failure;
+                   progress:(nullable void(^)(NSProgress * _Nonnull progress))progress
+                    success:(nullable void(^)(id _Nullable responseObject))success
+                    failure:(nullable void(^)(NSError * _Nonnull error))failure;
 
 /** 取消所有Http请求 */
 + (void)cancelAllRequest;
