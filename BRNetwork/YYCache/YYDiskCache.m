@@ -351,7 +351,7 @@ static void _YYDiskCacheSetGlobal(YYDiskCache *cache) {
             return;
         }
         Lock();
-        [_kv removeAllItemsWithProgressBlock:progress endBlock:end];
+        [self->_kv removeAllItemsWithProgressBlock:progress endBlock:end];
         Unlock();
     });
 }
