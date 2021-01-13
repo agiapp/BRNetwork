@@ -274,7 +274,6 @@ static void _YYDiskCacheSetGlobal(YYDiskCache *cache) {
         value = _customArchiveBlock(object);
     } else {
         @try {
-            // 纠正第三方最低兼容版本，清空重新pod试一下
             if (@available(iOS 11.0, *)) {
                 NSError *error;
                 value = [NSKeyedArchiver archivedDataWithRootObject:object requiringSecureCoding:NO error:&error];
