@@ -24,6 +24,9 @@ Pod::Spec.new do |s|
   
   s.default_subspec = 'Core', 'YYCache'   # 默认集成的子模块（全部）
   
+  s.libraries = 'sqlite3'
+  s.frameworks = 'UIKit', 'CoreFoundation', 'QuartzCore'
+  
   # 核心网络请求库封装（不带缓存库）
   s.subspec 'Core' do |ss|
     ss.source_files = 'BRNetwork/Core'
@@ -33,8 +36,6 @@ Pod::Spec.new do |s|
   # 缓存库
   s.subspec 'YYCache' do |ss|
     ss.source_files = 'BRNetwork/YYCache'
-    ss.libraries = 'sqlite3'
-    ss.frameworks = 'UIKit', 'CoreFoundation', 'QuartzCore'
   end
  
 end
