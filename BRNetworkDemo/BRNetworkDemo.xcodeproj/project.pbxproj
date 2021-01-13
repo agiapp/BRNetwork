@@ -7,8 +7,8 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		2C34C33AB431E86092090334 /* libPods-BRNetworkDemo.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 04A576A5C48629F2C4A31AFE /* libPods-BRNetworkDemo.a */; };
 		760A99A596A013E3D02016F2 /* libPods-BRNetworkDemoTests.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 774682374ECDF68B24FCEF74 /* libPods-BRNetworkDemoTests.a */; };
+		ACFD52948FB3362965B31C2D /* libPods-BRNetworkDemo.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 04A576A5C48629F2C4A31AFE /* libPods-BRNetworkDemo.a */; };
 		C51A39B120AAF99400F46E2A /* BRNetworkHepler.m in Sources */ = {isa = PBXBuildFile; fileRef = C51A39AF20AAF99400F46E2A /* BRNetworkHepler.m */; };
 		C5A628042079BBF4008B3A2F /* AppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = C5A628032079BBF4008B3A2F /* AppDelegate.m */; };
 		C5A628072079BBF4008B3A2F /* ViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = C5A628062079BBF4008B3A2F /* ViewController.m */; };
@@ -61,7 +61,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				2C34C33AB431E86092090334 /* libPods-BRNetworkDemo.a in Frameworks */,
+				ACFD52948FB3362965B31C2D /* libPods-BRNetworkDemo.a in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
