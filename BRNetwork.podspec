@@ -34,7 +34,7 @@ Pod::Spec.new do |s|
   s.subspec 'YYCache' do |ss|
     ss.source_files = 'BRNetwork/YYCache/*.{h,m}'
     ss.library = 'sqlite3'
-    ss.frameworks = 'UIKit', 'CoreFoundation', 'QuartzCore'
+    #ss.frameworks = 'UIKit', 'CoreFoundation', 'QuartzCore'
   end
  
 end
