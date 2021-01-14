@@ -22,24 +22,24 @@ Pod::Spec.new do |s|
 
   s.requires_arc = true   # 框架要求ARC环境下使用
   
-  s.source_files = 'BRNetwork/Core/*.{h,m}', 'BRNetwork/YYCache/*.{h,m}'
-  s.dependency 'AFNetworking'
-  s.library = 'sqlite3'
-  s.frameworks = 'UIKit', 'CoreFoundation', 'QuartzCore'
+#  s.source_files = 'BRNetwork/Core/*.{h,m}', 'BRNetwork/YYCache/*.{h,m}'
+#  s.dependency 'AFNetworking'
+#  s.library = 'sqlite3'
+#  s.frameworks = 'UIKit', 'CoreFoundation', 'QuartzCore'
   
-#  #s.default_subspec = 'Core', 'YYCache'   # 默认集成的子模块（全部）
-#
-#  # 核心网络请求库封装（不带缓存库）
-#  s.subspec 'Core' do |ss|
-#    ss.source_files = 'BRNetwork/Core/*.{h,m}'
-#    ss.dependency 'AFNetworking'
-#  end
-#
-#  # 缓存库
-#  s.subspec 'YYCache' do |ss|
-#    ss.source_files = 'BRNetwork/YYCache/*.{h,m}'
-#    ss.library = 'sqlite3'
-#    ss.frameworks = 'UIKit', 'CoreFoundation', 'QuartzCore'
-#  end
+  s.default_subspec = 'Core', 'Cache'   # 默认集成的子模块（全部）
+
+  # 核心网络请求库封装（不带缓存库）
+  s.subspec 'Core' do |ss|
+    ss.source_files = 'BRNetwork/Core/*.{h,m}'
+    ss.dependency 'AFNetworking'
+  end
+
+  # 缓存库
+  s.subspec 'Cache' do |ss|
+    ss.source_files = 'BRNetwork/Cache/*.{h,m}'
+    ss.library = 'sqlite3'
+    ss.frameworks = 'UIKit', 'CoreFoundation', 'QuartzCore'
+  end
  
 end
