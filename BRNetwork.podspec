@@ -1,6 +1,6 @@
 Pod::Spec.new do |s|
   s.name         = "BRNetwork"  # 框架的名称
-  s.version      = "1.2.6"  # 框架的版本号
+  s.version      = "1.2.7"  # 框架的版本号
   s.summary      = "BRNetwork是一个基于AFNetworking和YYCache封装的轻量级网络请求工具" # 框架的简单介绍
   # 框架的详细描述(详细介绍，要比简介长)
   s.description  = <<-DESC
@@ -33,7 +33,7 @@ Pod::Spec.new do |s|
   # 缓存库
   s.subspec 'YYCache' do |ss|
     ss.source_files = 'BRNetwork/YYCache/*.{h,m}'
-    ss.libraries = 'libsqlite3'
+    ss.library = 'sqlite3'
     ss.frameworks = 'UIKit', 'CoreFoundation', 'QuartzCore'
   end
  
