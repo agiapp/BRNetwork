@@ -400,7 +400,7 @@ static AFHTTPSessionManager *_sessionManager;
             // NSURL 转 NSString: filePath.path 或 filePath.absoluteString
             success ? success(filePath.path) : nil;
         } else {
-            failure(error);
+            failure ? failure(error) : nil;
         }
     }];
     // 开始下载
@@ -420,8 +420,8 @@ static AFHTTPSessionManager *_sessionManager;
     NSURLSessionTask *sessionTask = [_sessionManager POST:Url parameters:params headers:nil constructingBodyWithBlock:^(id<AFMultipartFormData>  _Nonnull formData) {
         NSError *error = nil;
         [formData appendPartWithFileURL:[NSURL URLWithString:filePath] name:nameKey error:&error];
-        if (failure && error) {
-            failure(error);
+        if (error) {
+            failure ? failure(error) : nil;
         }
     } progress:^(NSProgress * _Nonnull uploadProgress) {
         //上传进度
