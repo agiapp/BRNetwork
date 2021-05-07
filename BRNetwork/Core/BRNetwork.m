@@ -312,8 +312,14 @@ static AFHTTPSessionManager *_sessionManager;
                   success:(BRHttpSuccessBlock)successBlock
                   failure:(BRHttpFailureBlock)failureBlock {
     [self dataTaskWithMethod:method url:url params:params headers:headers success:^(NSURLSessionDataTask * _Nonnull task, id _Nullable responseObject) {
+        
+        BOOL isEmpty = (responseObject == nil || [responseObject isEqual:[NSNull null]] ||
+        [responseObject isEqual:@"null"] || [responseObject isEqual:@"(null)"] ||
+        ([responseObject respondsToSelector:@selector(length)] && [(NSData *)responseObject length] == 0) ||
+        ([responseObject respondsToSelector:@selector(count)] && [(NSArray *)responseObject count] == 0));
+    
         // 响应序列化类型是HTTP时，请求结果输出的是二进制数据
-        if (![NSJSONSerialization isValidJSONObject:responseObject]) {
+        if (!isEmpty && ![NSJSONSerialization isValidJSONObject:responseObject]) {
             NSError *error = nil;
             // 将二进制数据序列化成JSON数据
             id obj = [NSJSONSerialization JSONObjectWithData:responseObject options:NSJSONReadingMutableContainers error:&error];
