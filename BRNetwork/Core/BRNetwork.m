@@ -52,6 +52,16 @@ static AFHTTPSessionManager *_sessionManager;
 + (void)initialize {
     // 创建请求管理者对象
     _sessionManager = [AFHTTPSessionManager manager];
+    // 设置默认数据
+    [self configDefaultData];
+}
+
+#pragma mark - 设置默认值
++ (void)configDefaultData {
+    // 设置请求参数的格式：二进制格式
+    _sessionManager.requestSerializer = [AFHTTPRequestSerializer serializer];
+    // 设置服务器返回结果的格式：JSON格式
+    _sessionManager.responseSerializer = [AFJSONResponseSerializer serializer];
     // 配置响应序列化(设置请求接口回来的时候支持什么类型的数据,设置接收参数类型)
     _sessionManager.responseSerializer.acceptableContentTypes = [NSSet setWithObjects:@"application/json",
                                                                  @"text/html",
@@ -63,16 +73,6 @@ static AFHTTPSessionManager *_sessionManager;
                                                                  @"application/octet-stream",
                                                                  @"application/zip",
                                                                  @"text/text", nil];
-    // 设置默认数据
-    [self configDefaultData];
-}
-
-#pragma mark - 设置默认值
-+ (void)configDefaultData {
-    // 设置请求参数的格式：二进制格式
-    _sessionManager.requestSerializer = [AFHTTPRequestSerializer serializer];
-    // 设置服务器返回结果的格式：JSON格式
-    _sessionManager.responseSerializer = [AFJSONResponseSerializer serializer];
     // 最大请求并发任务数
     //_sessionManager.operationQueue.maxConcurrentOperationCount = 5;
     // 设置请求超时时间
@@ -121,11 +121,15 @@ static AFHTTPSessionManager *_sessionManager;
 
 #pragma mark - 设置请求超时时间(默认30s)
 + (void)setRequestTimeoutInterval:(NSTimeInterval)timeout {
+    if (!_sessionManager) return;
+    
     _sessionManager.requestSerializer.timeoutInterval = timeout;
 }
 
 #pragma mark - 设置请求序列化类型
 + (void)setRequestSerializerType:(BRRequestSerializer)type {
+    if (!_sessionManager) return;
+    
     switch (type) {
         case BRRequestSerializerHTTP:
         {
@@ -145,6 +149,8 @@ static AFHTTPSessionManager *_sessionManager;
 
 #pragma mark - 设置响应序列化类型
 + (void)setResponseSerializerType:(BRResponseSerializer)type {
+    if (!_sessionManager) return;
+    
     switch (type) {
         case BRResponseSerializerHTTP:
         {
