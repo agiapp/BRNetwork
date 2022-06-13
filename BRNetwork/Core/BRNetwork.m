@@ -58,10 +58,10 @@ static AFHTTPSessionManager *_sessionManager;
 
 #pragma mark - 设置默认值
 + (void)configDefaultData {
-    // 设置请求参数的格式：二进制格式
+    // 设置请求参数的格式：二进制格式（默认为：AFHTTPRequestSerializer 二进制格式）
     _sessionManager.requestSerializer = [AFHTTPRequestSerializer serializer];
-    // 设置服务器返回结果的格式：JSON格式
-    _sessionManager.responseSerializer = [AFJSONResponseSerializer serializer];
+    // 设置服务器返回结果的格式：二进制格式（默认为：AFJSONResponseSerializer JSON格式）
+    _sessionManager.responseSerializer = [AFHTTPResponseSerializer serializer];
     // 配置响应序列化(设置请求接口回来的时候支持什么类型的数据,设置接收参数类型)
     _sessionManager.responseSerializer.acceptableContentTypes = [NSSet setWithObjects:@"application/json",
                                                                  @"text/html",
