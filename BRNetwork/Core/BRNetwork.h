@@ -126,7 +126,7 @@ NS_ASSUME_NONNULL_BEGIN
  *  @param failureBlock 请求失败的回调
  */
 + (void)getWithUrl:(NSString *)url
-            params:(nullable NSDictionary *)params
+            params:(nullable id)params
            headers:(nullable NSDictionary *)headers
        cachePolicy:(BRCachePolicy)cachePolicy
            success:(nullable BRHttpSuccessBlock)successBlock
@@ -143,7 +143,7 @@ NS_ASSUME_NONNULL_BEGIN
  *  @param failureBlock 请求失败的回调
  */
 + (void)postWithUrl:(NSString *)url
-            params:(nullable NSDictionary *)params
+            params:(nullable id)params
            headers:(nullable NSDictionary *)headers
        cachePolicy:(BRCachePolicy)cachePolicy
            success:(nullable BRHttpSuccessBlock)successBlock
@@ -162,7 +162,7 @@ NS_ASSUME_NONNULL_BEGIN
  */
 + (void)requestWithMethod:(BRRequestMethod)method
                       url:(NSString *)url
-                   params:(nullable NSDictionary *)params
+                   params:(nullable id)params
                   headers:(nullable NSDictionary *)headers
               cachePolicy:(BRCachePolicy)cachePolicy
                   success:(nullable BRHttpSuccessBlock)successBlock

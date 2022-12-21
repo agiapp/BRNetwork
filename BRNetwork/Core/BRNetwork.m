@@ -188,32 +188,32 @@ static AFHTTPSessionManager *_sessionManager;
 
 #pragma mark - GET请求方法
 + (void)getWithUrl:(NSString *)url
-            params:(NSDictionary *)params
-           headers:(NSDictionary *)headers
+            params:(nullable id)params
+           headers:(nullable NSDictionary *)headers
        cachePolicy:(BRCachePolicy)cachePolicy
-           success:(BRHttpSuccessBlock)successBlock
-           failure:(BRHttpFailureBlock)failureBlock {
+           success:(nullable BRHttpSuccessBlock)successBlock
+           failure:(nullable BRHttpFailureBlock)failureBlock {
     [self requestWithMethod:BRRequestMethodGET url:url params:params headers:headers cachePolicy:cachePolicy success:successBlock failure:failureBlock];
 }
 
 #pragma mark - POST请求方法
 + (void)postWithUrl:(NSString *)url
-             params:(NSDictionary *)params
-            headers:(NSDictionary *)headers
+             params:(nullable id)params
+            headers:(nullable NSDictionary *)headers
         cachePolicy:(BRCachePolicy)cachePolicy
-            success:(BRHttpSuccessBlock)successBlock
-            failure:(BRHttpFailureBlock)failureBlock {
+            success:(nullable BRHttpSuccessBlock)successBlock
+            failure:(nullable BRHttpFailureBlock)failureBlock {
     [self requestWithMethod:BRRequestMethodPOST url:url params:params headers:headers cachePolicy:cachePolicy success:successBlock failure:failureBlock];
 }
 
 #pragma mark - 网络请求公共方法
 + (void)requestWithMethod:(BRRequestMethod)method
                       url:(NSString *)url
-                   params:(NSDictionary *)params
-                  headers:(NSDictionary *)headers
+                   params:(nullable id)params
+                  headers:(nullable NSDictionary *)headers
               cachePolicy:(BRCachePolicy)cachePolicy
-                  success:(BRHttpSuccessBlock)successBlock
-                  failure:(BRHttpFailureBlock)failureBlock {
+                  success:(nullable BRHttpSuccessBlock)successBlock
+                  failure:(nullable BRHttpFailureBlock)failureBlock {
     if (!(url && [url hasPrefix:@"http"]) && _baseUrl && _baseUrl.length > 0) {
         // 获取完整的url路径
         url = [NSString stringWithFormat:@"%@%@", _baseUrl, url];
@@ -313,10 +313,10 @@ static AFHTTPSessionManager *_sessionManager;
 #pragma mark - 网络请求处理
 + (void)requestWithMethod:(BRRequestMethod)method
                       url:(NSString *)url
-                   params:(NSDictionary *)params
-                  headers:(NSDictionary *)headers
-                  success:(BRHttpSuccessBlock)successBlock
-                  failure:(BRHttpFailureBlock)failureBlock {
+                   params:(nullable id)params
+                  headers:(nullable NSDictionary *)headers
+                  success:(nullable BRHttpSuccessBlock)successBlock
+                  failure:(nullable BRHttpFailureBlock)failureBlock {
     [self dataTaskWithMethod:method url:url params:params headers:headers success:^(NSURLSessionDataTask * _Nonnull task, id _Nullable responseObject) {
         
         BOOL isEmpty = (responseObject == nil || [responseObject isEqual:[NSNull null]] ||
@@ -356,7 +356,7 @@ static AFHTTPSessionManager *_sessionManager;
 #pragma mark - 请求任务
 + (void)dataTaskWithMethod:(BRRequestMethod)method
                        url:(NSString *)url
-                    params:(nullable NSDictionary *)params
+                    params:(nullable id)params
                    headers:(nullable NSDictionary <NSString *, NSString *> *)headers
                    success:(nullable void (^)(NSURLSessionDataTask * _Nonnull task, id _Nullable responseObject))success
                    failure:(nullable void (^)(NSURLSessionDataTask * _Nullable task, NSError * _Nonnull error))failure {
@@ -383,9 +383,9 @@ static AFHTTPSessionManager *_sessionManager;
 
 #pragma mark - 下载文件
 + (void)downloadFileWithUrl:(NSString *)url
-                   progress:(void(^)(NSProgress *progress))progress
-                    success:(void(^)(NSString *filePath))success
-                    failure:(void(^)(NSError *error))failure {
+                   progress:(nullable void(^)(NSProgress *progress))progress
+                    success:(nullable void(^)(NSString *filePath))success
+                    failure:(nullable void(^)(NSError *error))failure {
     NSURL *URL = [NSURL URLWithString:url];
     NSURLRequest *request = [NSURLRequest requestWithURL:URL];
     __block NSURLSessionDownloadTask *downloadTask = [_sessionManager downloadTaskWithRequest:request progress:^(NSProgress * _Nonnull downloadProgress) {
@@ -423,12 +423,12 @@ static AFHTTPSessionManager *_sessionManager;
 
 #pragma mark - 上传文件
 + (void)uploadFileWithUrl:(NSString *)Url
-                   params:(id)params
-                  nameKey:(NSString *)nameKey
-                 filePath:(NSString *)filePath
-                 progress:(void(^)(NSProgress *progress))progress
-                  success:(void(^)(id responseObject))success
-                  failure:(void(^)(NSError *error))failure {
+                   params:(nullable id)params
+                  nameKey:(nullable NSString *)nameKey
+                 filePath:(nullable NSString *)filePath
+                 progress:(nullable void(^)(NSProgress *progress))progress
+                  success:(nullable void(^)(id responseObject))success
+                  failure:(nullable void(^)(NSError *error))failure {
     NSURLSessionTask *sessionTask = [_sessionManager POST:Url parameters:params headers:nil constructingBodyWithBlock:^(id<AFMultipartFormData>  _Nonnull formData) {
         NSError *error = nil;
         [formData appendPartWithFileURL:[NSURL URLWithString:filePath] name:nameKey error:&error];
@@ -451,15 +451,15 @@ static AFHTTPSessionManager *_sessionManager;
 
 #pragma mark - 上传单/多张图片
 + (void)uploadImagesWithUrl:(NSString *)Url
-                     params:(id)params
-                    nameKey:(NSString *)nameKey
-                     images:(NSArray<UIImage *> *)images
-                  fileNames:(NSArray<NSString *> *)fileNames
+                     params:(nullable id)params
+                    nameKey:(nullable NSString *)nameKey
+                     images:(nullable NSArray<UIImage *> *)images
+                  fileNames:(nullable NSArray<NSString *> *)fileNames
                  imageScale:(CGFloat)imageScale
-                  imageType:(NSString *)imageType
-                   progress:(void(^)(NSProgress *progress))progress
-                    success:(void(^)(id responseObject))success
-                    failure:(void(^)(NSError *error))failure {
+                  imageType:(nullable NSString *)imageType
+                   progress:(nullable void(^)(NSProgress *progress))progress
+                    success:(nullable void(^)(id responseObject))success
+                    failure:(nullable void(^)(NSError *error))failure {
     NSURLSessionTask *sessionTask = [_sessionManager POST:Url parameters:params headers:nil constructingBodyWithBlock:^(id<AFMultipartFormData>  _Nonnull formData) {
         // 循环遍历上传图片
         [images enumerateObjectsUsingBlock:^(UIImage * _Nonnull image, NSUInteger idx, BOOL * _Nonnull stop) {
