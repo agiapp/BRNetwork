@@ -72,9 +72,9 @@ typedef NS_ENUM(NSUInteger, BRResponseSerializer) {
 };
 
 /** 成功的回调 */
-typedef void (^BRHttpSuccessBlock)(id _Nullable responseObject);
+typedef void (^BRHttpSuccessBlock)(NSURLSessionDataTask * _Nullable task, id _Nullable responseObject);
 /** 失败的回调 */
-typedef void (^BRHttpFailureBlock)(NSError * _Nonnull error);
+typedef void (^BRHttpFailureBlock)(NSURLSessionDataTask * _Nullable task, NSError * _Nonnull error);
 /** 网络状态Block */
 typedef void(^BRNetworkStatusBlock)(BRNetworkStatus status);
 

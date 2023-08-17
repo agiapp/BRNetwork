@@ -230,44 +230,44 @@ static AFHTTPSessionManager *_sessionManager;
     if (cachePolicy == BRCachePolicyNetworkOnly) {
         [self requestWithMethod:method url:url params:params headers:headers success:successBlock failure:failureBlock];
     } else if (cachePolicy == BRCachePolicyNetworkAndSaveCache) {
-        [self requestWithMethod:method url:url params:params headers:headers success:^(id responseObject) {
+        [self requestWithMethod:method url:url params:params headers:headers success:^(NSURLSessionDataTask *task, id responseObject) {
             // 更新缓存
             [BRCache saveHttpCache:responseObject url:url params:params];
-            successBlock ? successBlock(responseObject) : nil;
-        } failure:^(NSError *error) {
-            failureBlock ? failureBlock(error) : nil;
+            successBlock ? successBlock(task, responseObject) : nil;
+        } failure:^(NSURLSessionDataTask *task, NSError *error) {
+            failureBlock ? failureBlock(task, error) : nil;
         }];
     } else if (cachePolicy == BRCachePolicyNetworkElseCache) {
-        [self requestWithMethod:method url:url params:params headers:headers success:^(id responseObject) {
+        [self requestWithMethod:method url:url params:params headers:headers success:^(NSURLSessionDataTask *task, id responseObject) {
             // 更新缓存
             [BRCache saveHttpCache:responseObject url:url params:params];
-            successBlock ? successBlock(responseObject) : nil;
-        } failure:^(NSError *error) {
+            successBlock ? successBlock(task, responseObject) : nil;
+        } failure:^(NSURLSessionDataTask *task, NSError *error) {
             [self getHttpCache:url params:params headers:headers resultBlock:^(id<NSCoding> object) {
                 if (object) {
-                    successBlock ? successBlock(object) : nil;
+                    successBlock ? successBlock(task, object) : nil;
                 } else {
-                    failureBlock ? failureBlock(error) : nil;
+                    failureBlock ? failureBlock(task, error) : nil;
                 }
             }];
         }];
     } else if (cachePolicy == BRCachePolicyCacheOnly) {
         [self getHttpCache:url params:params headers:headers resultBlock:^(id<NSCoding> object) {
-            successBlock ? successBlock(object) : nil;
+            successBlock ? successBlock(nil, object) : nil;
         }];
     } else if (cachePolicy == BRCachePolicyCacheElseNetwork) {
         // 先从缓存读取数据
         [self getHttpCache:url params:params headers:headers resultBlock:^(id<NSCoding> object) {
             if (object) {
-                successBlock ? successBlock(object) : nil;
+                successBlock ? successBlock(nil, object) : nil;
             } else {
                 // 如果没有缓存再从网络获取
-                [self requestWithMethod:method url:url params:params headers:headers success:^(id responseObject) {
+                [self requestWithMethod:method url:url params:params headers:headers success:^(NSURLSessionDataTask *task, id responseObject) {
                     // 更新缓存
                     [BRCache saveHttpCache:responseObject url:url params:params];
-                    successBlock ? successBlock(responseObject) : nil;
-                } failure:^(NSError *error) {
-                    failureBlock ? failureBlock(error) : nil;
+                    successBlock ? successBlock(task, responseObject) : nil;
+                } failure:^(NSURLSessionDataTask *task, NSError *error) {
+                    failureBlock ? failureBlock(task, error) : nil;
                 }];
             }
         }];
@@ -275,33 +275,33 @@ static AFHTTPSessionManager *_sessionManager;
         // 先从缓存读取数据
         [self getHttpCache:url params:params headers:headers resultBlock:^(id<NSCoding> object) {
             if (object) {
-                successBlock ? successBlock(object) : nil;
+                successBlock ? successBlock(nil, object) : nil;
             }
             // 同时再从网络获取
-            [self requestWithMethod:method url:url params:params headers:headers success:^(id responseObject) {
+            [self requestWithMethod:method url:url params:params headers:headers success:^(NSURLSessionDataTask *task, id responseObject) {
                 // 更新本地缓存
                 [BRCache saveHttpCache:responseObject url:url params:params];
                 // 如果本地不存在缓存，就获取网络数据
                 if (!object) {
-                    successBlock ? successBlock(responseObject) : nil;
+                    successBlock ? successBlock(task, responseObject) : nil;
                 }
-            } failure:^(NSError *error) {
-                failureBlock ? failureBlock(error) : nil;
+            } failure:^(NSURLSessionDataTask *task, NSError *error) {
+                failureBlock ? failureBlock(task, error) : nil;
             }];
         }];
     } else if (cachePolicy == BRCachePolicyCacheThenNetwork) {
         // 先从缓存读取数据（这种情况successBlock调用两次）
         [self getHttpCache:url params:params headers:headers resultBlock:^(id<NSCoding> object) {
             if (object) {
-                successBlock ? successBlock(object) : nil;
+                successBlock ? successBlock(nil, object) : nil;
             }
             // 再从网络获取
-            [self requestWithMethod:method url:url params:params headers:headers success:^(id responseObject) {
+            [self requestWithMethod:method url:url params:params headers:headers success:^(NSURLSessionDataTask *task, id responseObject) {
                 // 更新缓存
                 [BRCache saveHttpCache:responseObject url:url params:params];
-                successBlock ? successBlock(responseObject) : nil;
-            } failure:^(NSError *error) {
-                failureBlock ? failureBlock(error) : nil;
+                successBlock ? successBlock(task, responseObject) : nil;
+            } failure:^(NSURLSessionDataTask *task, NSError *error) {
+                failureBlock ? failureBlock(task, error) : nil;
             }];
         }];
     } else {
@@ -337,10 +337,10 @@ static AFHTTPSessionManager *_sessionManager;
         }
         if (_isOpenLog) BRApiLog(@"\nurl：%@\nheader：\n%@\nparams：\n%@\nsuccess：\n%@\n\n", url, headers, params, responseObject);
         [[self allSessionTask] removeObject:task];
-        successBlock ? successBlock(responseObject) : nil;
+        successBlock ? successBlock(task, responseObject) : nil;
     } failure:^(NSURLSessionDataTask * _Nullable task, NSError * _Nonnull error) {
         if (_isOpenLog) BRApiLog(@"\nurl：%@\nheader：\n%@\nparams：\n%@\nfailure：\n%@\n\n", url, headers, params, error);
-        failureBlock ? failureBlock(error) : nil;
+        failureBlock ? failureBlock(task, error) : nil;
         [[self allSessionTask] removeObject:task];
     }];
 }
