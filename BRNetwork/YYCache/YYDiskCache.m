@@ -15,9 +15,21 @@
 #import <CommonCrypto/CommonCrypto.h>
 #import <objc/runtime.h>
 #import <time.h>
+//#import <os/lock.h>
 
+/**
+    线程同步技术：
+    dispatch_semaphore_wait() 方法会阻塞当前线程。如果在该方法调用前没有为该线程指定 QoS 类别的优先级，可能会引发优先级反转的问题。
+    这里，使用 os_unfair_lock 来代替 dispatch_semaphore_wait()。
+    os_unfair_lock 是 Apple 推出的一种线程同步技术，它的优点是比 GCD 的信号量更快，且不会发生优先级反转的问题。
+ */
+// 老方法：可能会引发优先级反转的问题
 #define Lock() dispatch_semaphore_wait(self->_lock, DISPATCH_TIME_FOREVER)
 #define Unlock() dispatch_semaphore_signal(self->_lock)
+
+// 新方法：最低兼容iOS10
+//#define Lock() os_unfair_lock_lock(&_lock)      // 加锁
+//#define Unlock() os_unfair_lock_unlock(&_lock)  // 解锁
 
 static const int extended_data_key;
 
@@ -79,6 +91,7 @@ static void _YYDiskCacheSetGlobal(YYDiskCache *cache) {
 
 @implementation YYDiskCache {
     YYKVStorage *_kv;
+    //os_unfair_lock _lock;
     dispatch_semaphore_t _lock;
     dispatch_queue_t _queue;
 }

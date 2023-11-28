@@ -55,6 +55,7 @@ static NSArray *_filtrationCacheKey;
 
 #pragma mark - 删除所有网络缓存
 + (void)removeAllHttpCache {
+    [_dataCache.memoryCache removeAllObjects];
     [_dataCache.diskCache removeAllObjects];
 }
 
