@@ -172,63 +172,135 @@ NS_ASSUME_NONNULL_BEGIN
  *  下载文件
  *
  *  @param url              请求地址
+ *  @param cachePath        文件下载的缓存目录
  *  @param progress         下载进度的回调
  *  @param success          下载成功的回调
  *  @param failure          下载失败的回调
  *
  */
-
 + (void)downloadFileWithUrl:(NSString *)url
+                  cachePath:(NSString *)cachePath
                    progress:(nullable void(^)(NSProgress *progress))progress
-                    success:(nullable void(^)(NSString * _Nullable filePath))success
-                    failure:(nullable void(^)(NSError * _Nullable error))failure;
-
+                    success:(nullable void(^)(NSString *filePath))success
+                    failure:(nullable void(^)(NSError *error))failure;
 
 /**
- *  上传文件
+ *  上传文件（传入的是：文件二进制数据）
  *
- *  @param Url              请求地址
+ *  @param url              请求地址
  *  @param params           请求参数
- *  @param nameKey          文件对应服务器上的字段
- *  @param filePath         文件本地的沙盒路径
+ *  @param headers          请求头
+ *  @param fileData         文件二进制数据
+ *  @param name             表单中文件数据的参数名（即文件数据对应的key，如：file，upload等），服务器端接收文件的参数名
+ *  @param fileName         自定义上传到服务器的文件名称
+ *  @param mimeType         上传文件的 MIME 类型。MIME 类型描述了文件的内容类型。例如：image/jpeg 或 image/png 等。
  *  @param progress         上传进度的回调
  *  @param success          请求成功的回调
  *  @param failure          请求失败的回调
  *
  */
-+ (void)uploadFileWithUrl:(NSString *)Url
++ (void)uploadFileWithUrl:(NSString *)url
                    params:(nullable id)params
-                  nameKey:(nullable NSString *)nameKey
-                 filePath:(nullable NSString *)filePath
-                 progress:(nullable void(^)(NSProgress * _Nonnull progress))progress
-                  success:(nullable void(^)(id _Nullable responseObject))success
-                  failure:(nullable void(^)(NSError * _Nonnull error))failure;
+                  headers:(nullable NSDictionary *)headers
+                 fileData:(NSData *)fileData
+                     name:(NSString *)name
+                 fileName:(NSString *)fileName
+                 mimeType:(NSString *)mimeType
+                 progress:(nullable void(^)(NSProgress *progress))progress
+                  success:(nullable void(^)(id responseObject))success
+                  failure:(nullable void(^)(NSError *error))failure;
 
 /**
- *  上传单/多张图片
+ *  上传多个文件（传入的是：文件二进制数据）
  *
- *  @param Url              请求地址
+ *  @param url              请求地址
  *  @param params           请求参数
- *  @param nameKey          图片对应服务器上的字段
- *  @param images           图片数组
- *  @param fileNames        图片文件名数组, 可以为nil, 数组内的文件名默认为当前日期时间"yyyyMMddHHmmss"
- *  @param imageScale       图片文件压缩比 范围 (0.0f ~ 1.0f)
- *  @param imageType        图片文件的类型,例:png、jpg(默认类型)....
+ *  @param headers          请求头
+ *  @param fileDatas        文件二进制数据
+ *  @param name             表单中文件数据的参数名（即文件数据对应的key，如：file，upload等），服务器端接收文件的参数名
+ *  @param fileName         自定义上传到服务器的文件名称
+ *  @param mimeType         上传文件的 MIME 类型。MIME 类型描述了文件的内容类型。例如：image/jpeg 或 image/png 等。
  *  @param progress         上传进度的回调
  *  @param success          请求成功的回调
  *  @param failure          请求失败的回调
  *
  */
-+ (void)uploadImagesWithUrl:(NSString *)Url
-                     params:(nullable id)params
-                    nameKey:(nullable NSString *)nameKey
-                     images:(nullable NSArray<UIImage *> *)images
-                  fileNames:(nullable NSArray<NSString *> *)fileNames
-                 imageScale:(CGFloat)imageScale
-                  imageType:(nullable NSString *)imageType
-                   progress:(nullable void(^)(NSProgress * _Nonnull progress))progress
-                    success:(nullable void(^)(id _Nullable responseObject))success
-                    failure:(nullable void(^)(NSError * _Nonnull error))failure;
++ (void)uploadFilesWithUrl:(NSString *)url
+                    params:(nullable id)params
+                   headers:(nullable NSDictionary *)headers
+                 fileDatas:(NSArray<NSData *> *)fileDatas
+                      name:(NSString *)name
+                  fileName:(NSString *)fileName
+                  mimeType:(NSString *)mimeType
+                  progress:(nullable void(^)(NSProgress *progress))progress
+                   success:(nullable void(^)(id responseObject))success
+                   failure:(nullable void(^)(NSError *error))failure;
+
+/**
+ *  上传文件（传入的是：本地文件路径，按文件原名称上传到服务器）
+ *
+ *  @param url              请求地址
+ *  @param params           请求参数
+ *  @param headers          请求头
+ *  @param filePath         文件本地沙盒路径
+ *  @param name             表单中文件数据的参数名（即文件数据对应的key，如：file，upload等），服务器端接收文件的参数名
+ *  @param progress         上传进度的回调
+ *  @param success          请求成功的回调
+ *  @param failure          请求失败的回调
+ *
+ */
++ (void)uploadFileWithUrl:(NSString *)url
+                   params:(nullable id)params
+                  headers:(nullable NSDictionary *)headers
+                 filePath:(NSString *)filePath
+                     name:(NSString *)name
+                 progress:(nullable void(^)(NSProgress *progress))progress
+                  success:(nullable void(^)(id responseObject))success
+                  failure:(nullable void(^)(NSError *error))failure;
+
+/**
+ *  上传图片
+ *
+ *  @param url              请求地址
+ *  @param params           请求参数
+ *  @param headers          请求头
+ *  @param image            图片对象
+ *  @param name             表单中文件数据的参数名（即文件数据对应的key，如：file，upload等），服务器端接收文件的参数名
+ *  @param progress         上传进度的回调
+ *  @param success          请求成功的回调
+ *  @param failure          请求失败的回调
+ *
+ */
++ (void)uploadImageWithUrl:(NSString *)url
+                    params:(nullable id)params
+                   headers:(nullable NSDictionary *)headers
+                     image:(UIImage *)image
+                      name:(NSString *)name
+                  progress:(nullable void(^)(NSProgress *progress))progress
+                   success:(nullable void(^)(id responseObject))success
+                   failure:(nullable void(^)(NSError *error))failure;
+
+/**
+ *  上传多个图片
+ *
+ *  @param url              请求地址
+ *  @param params           请求参数
+ *  @param headers          请求头
+ *  @param images           图片对象数组
+ *  @param name             表单中文件数据的参数名（即文件数据对应的key，如：file，upload等），服务器端接收文件的参数名
+ *  @param progress         上传进度的回调
+ *  @param success          请求成功的回调
+ *  @param failure          请求失败的回调
+ *
+ */
++ (void)uploadImagesWithUrl:(NSString *)url
+                    params:(nullable id)params
+                   headers:(nullable NSDictionary *)headers
+                    images:(NSArray<UIImage *> *)images
+                      name:(NSString *)name
+                  progress:(nullable void(^)(NSProgress *progress))progress
+                   success:(nullable void(^)(id responseObject))success
+                   failure:(nullable void(^)(NSError *error))failure;
 
 /** 取消所有Http请求 */
 + (void)cancelAllRequest;

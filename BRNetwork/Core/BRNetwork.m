@@ -67,6 +67,7 @@ static AFHTTPSessionManager *_sessionManager;
                                                                  @"text/html",
                                                                  @"text/json",
                                                                  @"text/plain",
+                                                                 @"multipart/form-data",
                                                                  @"text/javascript",
                                                                  @"text/xml",
                                                                  @"image/*",
@@ -383,6 +384,7 @@ static AFHTTPSessionManager *_sessionManager;
 
 #pragma mark - 下载文件
 + (void)downloadFileWithUrl:(NSString *)url
+                  cachePath:(NSString *)cachePath
                    progress:(nullable void(^)(NSProgress *progress))progress
                     success:(nullable void(^)(NSString *filePath))success
                     failure:(nullable void(^)(NSError *error))failure {
@@ -395,16 +397,14 @@ static AFHTTPSessionManager *_sessionManager;
         if (_isOpenLog) BRApiLog(@"下载进度：%.2f%%",100.0 * downloadProgress.completedUnitCount / downloadProgress.totalUnitCount);
         progress ? progress(downloadProgress) : nil;
     } destination:^NSURL *(NSURL *targetPath, NSURLResponse *response) {
-        // 下载完后，实际下载在临时文件夹里；在这里需要保存到本地缓存文件夹里
-        // 1.拼接缓存目录（保存到Download目录里）
-        NSString *downloadDir = [[NSSearchPathForDirectoriesInDomains(NSCachesDirectory, NSUserDomainMask, YES) lastObject] stringByAppendingPathComponent:@"Download"];
-        // 2.打开文件管理器
+        // 下载完后，实际下载在临时文件夹里；在这里需要把文件保存到本地沙盒 cachePath 目录下
+        // 1.打开文件管理器
         NSFileManager *fileManager = [NSFileManager defaultManager];
-        // 3.创建Download目录
-        [fileManager createDirectoryAtPath:downloadDir withIntermediateDirectories:YES attributes:nil error:nil];
-        // 4.拼接文件路径
-        NSString *filePath = [downloadDir stringByAppendingPathComponent:response.suggestedFilename];
-        // 5.返回文件位置的URL路径
+        // 2.创建Download目录
+        [fileManager createDirectoryAtPath:cachePath withIntermediateDirectories:YES attributes:nil error:nil];
+        // 3.拼接文件路径
+        NSString *filePath = [cachePath stringByAppendingPathComponent:response.suggestedFilename];
+        // 4.返回文件位置的URL路径
         return [NSURL fileURLWithPath:filePath];
     } completionHandler:^(NSURLResponse *response, NSURL *filePath, NSError *error) {
         [[self allSessionTask] removeObject:downloadTask];
@@ -421,17 +421,88 @@ static AFHTTPSessionManager *_sessionManager;
     downloadTask ? [[self allSessionTask] addObject:downloadTask] : nil;
 }
 
-#pragma mark - 上传文件
-+ (void)uploadFileWithUrl:(NSString *)Url
+#pragma mark - 上传文件（传入的是：文件二进制数据）
++ (void)uploadFileWithUrl:(NSString *)url
                    params:(nullable id)params
-                  nameKey:(nullable NSString *)nameKey
-                 filePath:(nullable NSString *)filePath
+                  headers:(nullable NSDictionary *)headers
+                 fileData:(NSData *)fileData
+                     name:(NSString *)name
+                 fileName:(NSString *)fileName
+                 mimeType:(NSString *)mimeType
                  progress:(nullable void(^)(NSProgress *progress))progress
                   success:(nullable void(^)(id responseObject))success
                   failure:(nullable void(^)(NSError *error))failure {
-    NSURLSessionTask *sessionTask = [_sessionManager POST:Url parameters:params headers:nil constructingBodyWithBlock:^(id<AFMultipartFormData>  _Nonnull formData) {
+    NSURLSessionTask *sessionTask = [_sessionManager POST:url parameters:params headers:headers constructingBodyWithBlock:^(id<AFMultipartFormData>  _Nonnull formData) {
+        // 在这个block中设置需要上传的文件
+    
+        /**
+          这个方法的作用是将指定的文件添加到表单数据中，以便在发送 HTTP 请求时一起发送给服务器。
+            data：要上传的文件[二进制流]
+            name：文件参数名称（如：file，upload等)
+            fileName：要保存在服务器上的文件名
+            mimeType：上传的文件的类型
+         */
+        [formData appendPartWithFileData:fileData name:name fileName:fileName mimeType:mimeType];
+    } progress:^(NSProgress * _Nonnull uploadProgress) {
+        //上传进度
+        progress ? progress(uploadProgress) : nil;
+    } success:^(NSURLSessionDataTask * _Nonnull task, id _Nullable responseObject) {
+        [[self allSessionTask] removeObject:task];
+        success ? success(responseObject) : nil;
+    } failure:^(NSURLSessionDataTask * _Nullable task, NSError * _Nonnull error) {
+        [[self allSessionTask] removeObject:task];
+        failure ? failure(error) : nil;
+    }];
+    // 添加最新的sessionTask到数组
+    sessionTask ? [[self allSessionTask] addObject:sessionTask] : nil;
+}
+
+#pragma mark - 上传多个文件（传入的是：文件二进制数据）
++ (void)uploadFilesWithUrl:(NSString *)url
+                    params:(nullable id)params
+                   headers:(nullable NSDictionary *)headers
+                 fileDatas:(NSArray<NSData *> *)fileDatas
+                      name:(NSString *)name
+                  fileName:(NSString *)fileName
+                  mimeType:(NSString *)mimeType
+                  progress:(nullable void(^)(NSProgress *progress))progress
+                   success:(nullable void(^)(id responseObject))success
+                   failure:(nullable void(^)(NSError *error))failure {
+    NSURLSessionTask *sessionTask = [_sessionManager POST:url parameters:params headers:headers constructingBodyWithBlock:^(id<AFMultipartFormData>  _Nonnull formData) {
+        // 使用循环同时上传多个文件
+        [fileDatas enumerateObjectsUsingBlock:^(NSData * _Nonnull fileData, NSUInteger idx, BOOL * _Nonnull stop) {
+            // 这个方法的作用是将指定的文件添加到表单数据中，以便在发送 HTTP 请求时一起发送给服务器。
+            [formData appendPartWithFileData:fileData name:name fileName:fileName mimeType:mimeType];
+        }];
+    } progress:^(NSProgress * _Nonnull uploadProgress) {
+        //上传进度
+        progress ? progress(uploadProgress) : nil;
+    } success:^(NSURLSessionDataTask * _Nonnull task, id _Nullable responseObject) {
+        [[self allSessionTask] removeObject:task];
+        success ? success(responseObject) : nil;
+    } failure:^(NSURLSessionDataTask * _Nullable task, NSError * _Nonnull error) {
+        [[self allSessionTask] removeObject:task];
+        failure ? failure(error) : nil;
+    }];
+    // 添加最新的sessionTask到数组
+    sessionTask ? [[self allSessionTask] addObject:sessionTask] : nil;
+}
+
+#pragma mark - 上传文件（传入的是：本地文件路径，按文件原名称上传到服务器）
++ (void)uploadFileWithUrl:(NSString *)url
+                   params:(nullable id)params
+                  headers:(nullable NSDictionary *)headers
+                 filePath:(NSString *)filePath
+                     name:(NSString *)name
+                 progress:(nullable void(^)(NSProgress *progress))progress
+                  success:(nullable void(^)(id responseObject))success
+                  failure:(nullable void(^)(NSError *error))failure {
+    NSURLSessionTask *sessionTask = [_sessionManager POST:url parameters:params headers:headers constructingBodyWithBlock:^(id<AFMultipartFormData>  _Nonnull formData) {
+        // 在这个block中设置需要上传的文件
         NSError *error = nil;
-        [formData appendPartWithFileURL:[NSURL URLWithString:filePath] name:nameKey error:&error];
+        // 按文件原名称上传到服务器
+        // 此方法省略了参数 fileName 和 mimeType，会根据'fileURL'的最后一个路径组件和'fileURL'扩展的系统关联MIME类型自动生成。
+        [formData appendPartWithFileURL:[NSURL URLWithString:filePath] name:name error:&error];
         if (error) {
             failure ? failure(error) : nil;
         }
@@ -449,35 +520,64 @@ static AFHTTPSessionManager *_sessionManager;
     sessionTask ? [[self allSessionTask] addObject:sessionTask] : nil;
 }
 
-#pragma mark - 上传单/多张图片
-+ (void)uploadImagesWithUrl:(NSString *)Url
-                     params:(nullable id)params
-                    nameKey:(nullable NSString *)nameKey
-                     images:(nullable NSArray<UIImage *> *)images
-                  fileNames:(nullable NSArray<NSString *> *)fileNames
-                 imageScale:(CGFloat)imageScale
-                  imageType:(nullable NSString *)imageType
-                   progress:(nullable void(^)(NSProgress *progress))progress
-                    success:(nullable void(^)(id responseObject))success
-                    failure:(nullable void(^)(NSError *error))failure {
-    NSURLSessionTask *sessionTask = [_sessionManager POST:Url parameters:params headers:nil constructingBodyWithBlock:^(id<AFMultipartFormData>  _Nonnull formData) {
-        // 循环遍历上传图片
+#pragma mark - 上传图片
++ (void)uploadImageWithUrl:(NSString *)url
+                    params:(nullable id)params
+                   headers:(nullable NSDictionary *)headers
+                     image:(UIImage *)image
+                      name:(NSString *)name
+                  progress:(nullable void(^)(NSProgress *progress))progress
+                   success:(nullable void(^)(id responseObject))success
+                   failure:(nullable void(^)(NSError *error))failure {
+    NSURLSessionTask *sessionTask = [_sessionManager POST:url parameters:params headers:headers constructingBodyWithBlock:^(id<AFMultipartFormData>  _Nonnull formData) {
+        // 在这个block中设置需要上传的文件
+        
+        // 将UIImage转换为JPEG格式的NSData（这里的1.0是质量参数）
+        NSData *imageData = UIImageJPEGRepresentation(image, 1.0f);
+        
+        // 自定义上传的图片名称
+        NSDateFormatter *formatter = [[NSDateFormatter alloc] init];
+        formatter.dateFormat = @"yyyyMMddHHmmss";
+        NSString *timeStr = [formatter stringFromDate:[NSDate date]];
+        NSString *imageName = [NSString stringWithFormat:@"pic_%@.jpg", timeStr];
+        
+        [formData appendPartWithFileData:imageData name:name fileName:imageName mimeType:@"image/jpg"];
+    } progress:^(NSProgress * _Nonnull uploadProgress) {
+        //上传进度
+        progress ? progress(uploadProgress) : nil;
+    } success:^(NSURLSessionDataTask * _Nonnull task, id _Nullable responseObject) {
+        [[self allSessionTask] removeObject:task];
+        success ? success(responseObject) : nil;
+    } failure:^(NSURLSessionDataTask * _Nullable task, NSError * _Nonnull error) {
+        [[self allSessionTask] removeObject:task];
+        failure ? failure(error) : nil;
+    }];
+    // 添加最新的sessionTask到数组
+    sessionTask ? [[self allSessionTask] addObject:sessionTask] : nil;
+}
+
+#pragma mark - 上传多个图片
++ (void)uploadImagesWithUrl:(NSString *)url
+                    params:(nullable id)params
+                   headers:(nullable NSDictionary *)headers
+                    images:(NSArray<UIImage *> *)images
+                      name:(NSString *)name
+                  progress:(nullable void(^)(NSProgress *progress))progress
+                   success:(nullable void(^)(id responseObject))success
+                   failure:(nullable void(^)(NSError *error))failure {
+    NSURLSessionTask *sessionTask = [_sessionManager POST:url parameters:params headers:nil constructingBodyWithBlock:^(id<AFMultipartFormData>  _Nonnull formData) {
+        // 使用循环同时上传多个文件
         [images enumerateObjectsUsingBlock:^(UIImage * _Nonnull image, NSUInteger idx, BOOL * _Nonnull stop) {
-            // 图片经过等比压缩后得到的二进制文件(imageData就是要上传的数据)
-            NSData *imageData = UIImageJPEGRepresentation(image, imageScale ?: 1.0f);
-            // 1.使用时间拼接上传图片名
+            // 将UIImage转换为JPEG格式的NSData（这里的1.0是质量参数）
+            NSData *imageData = UIImageJPEGRepresentation(image, 1.0f);
+        
+            // 自定义上传的图片名称
             NSDateFormatter *formatter = [[NSDateFormatter alloc] init];
             formatter.dateFormat = @"yyyyMMddHHmmss";
-            NSString *currentTimeStr = [formatter stringFromDate:[NSDate date]];
-            NSString *uploadFileName1 = [NSString stringWithFormat:@"%@%@.%@", currentTimeStr, @(idx), imageType?:@"jpg"];
-            // 2.使用传入的图片名
-            NSString *uploadFileName2 = [NSString stringWithFormat:@"%@.%@", fileNames[idx], imageType?:@"jpg"];
-            // 上传图片名
-            NSString *uploadFileName = fileNames ? uploadFileName2 : uploadFileName1;
-            // 上传图片类型
-            NSString *uploadFileType = [NSString stringWithFormat:@"image/%@", imageType ?: @"jpg"];
+            NSString *timeStr = [formatter stringFromDate:[NSDate date]];
+            NSString *imageName = [NSString stringWithFormat:@"pic_%@%@.jpg", timeStr, @(idx)];
             
-            [formData appendPartWithFileData:imageData name:nameKey fileName:uploadFileName mimeType:uploadFileType];
+            [formData appendPartWithFileData:imageData name:name fileName:imageName mimeType:@"image/jpg"];
         }];
     } progress:^(NSProgress * _Nonnull uploadProgress) {
         //上传进度
