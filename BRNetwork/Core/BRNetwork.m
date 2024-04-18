@@ -385,9 +385,9 @@ static AFHTTPSessionManager *_sessionManager;
 #pragma mark - 下载文件
 + (void)downloadFileWithUrl:(NSString *)url
                   cachePath:(NSString *)cachePath
-                   progress:(nullable void(^)(NSProgress *progress))progress
-                    success:(nullable void(^)(NSString *filePath))success
-                    failure:(nullable void(^)(NSError *error))failure {
+                   progress:(nullable void(^)(NSProgress *progress))progressBlock
+                    success:(nullable void(^)(NSString *filePath))successBlock
+                    failure:(nullable void(^)(NSError *error))failureBlock {
     NSURL *URL = [NSURL URLWithString:url];
     NSURLRequest *request = [NSURLRequest requestWithURL:URL];
     __block NSURLSessionDownloadTask *downloadTask = [_sessionManager downloadTaskWithRequest:request progress:^(NSProgress * _Nonnull downloadProgress) {
@@ -395,7 +395,7 @@ static AFHTTPSessionManager *_sessionManager;
         // progress.completedUnitCount: 当前大小;
         // Progress.totalUnitCount: 总大小
         if (_isOpenLog) BRApiLog(@"下载进度：%.2f%%",100.0 * downloadProgress.completedUnitCount / downloadProgress.totalUnitCount);
-        progress ? progress(downloadProgress) : nil;
+        progressBlock ? progressBlock(downloadProgress) : nil;
     } destination:^NSURL *(NSURL *targetPath, NSURLResponse *response) {
         // 下载完后，实际下载在临时文件夹里；在这里需要把文件保存到本地沙盒 cachePath 目录下
         // 1.打开文件管理器
@@ -410,9 +410,9 @@ static AFHTTPSessionManager *_sessionManager;
         [[self allSessionTask] removeObject:downloadTask];
         if (!error) {
             // NSURL 转 NSString: filePath.path 或 filePath.absoluteString
-            success ? success(filePath.path) : nil;
+            successBlock ? successBlock(filePath.path) : nil;
         } else {
-            failure ? failure(error) : nil;
+            failureBlock ? failureBlock(error) : nil;
         }
     }];
     // 开始下载
@@ -429,32 +429,21 @@ static AFHTTPSessionManager *_sessionManager;
                      name:(NSString *)name
                  fileName:(NSString *)fileName
                  mimeType:(NSString *)mimeType
-                 progress:(nullable void(^)(NSProgress *progress))progress
-                  success:(nullable void(^)(id responseObject))success
-                  failure:(nullable void(^)(NSError *error))failure {
-    NSURLSessionTask *sessionTask = [_sessionManager POST:url parameters:params headers:headers constructingBodyWithBlock:^(id<AFMultipartFormData>  _Nonnull formData) {
+                 progress:(nullable void(^)(NSProgress *progress))progressBlock
+                  success:(nullable BRHttpSuccessBlock)successBlock
+                  failure:(nullable BRHttpFailureBlock)failureBlock {
+    [self uploadTaskWithUrl:url params:params headers:headers constructingBodyWithBlock:^(id<AFMultipartFormData> formData) {
         // 在这个block中设置需要上传的文件
     
         /**
           这个方法的作用是将指定的文件添加到表单数据中，以便在发送 HTTP 请求时一起发送给服务器。
             data：要上传的文件[二进制流]
-            name：文件参数名称（如：file，upload等)
-            fileName：要保存在服务器上的文件名
+            name：文件流数据对应的参数名称（如：file，upload等)
+            fileName：要保存在服务器上的文件名（自定义文件原名称）
             mimeType：上传的文件的类型
          */
         [formData appendPartWithFileData:fileData name:name fileName:fileName mimeType:mimeType];
-    } progress:^(NSProgress * _Nonnull uploadProgress) {
-        //上传进度
-        progress ? progress(uploadProgress) : nil;
-    } success:^(NSURLSessionDataTask * _Nonnull task, id _Nullable responseObject) {
-        [[self allSessionTask] removeObject:task];
-        success ? success(responseObject) : nil;
-    } failure:^(NSURLSessionDataTask * _Nullable task, NSError * _Nonnull error) {
-        [[self allSessionTask] removeObject:task];
-        failure ? failure(error) : nil;
-    }];
-    // 添加最新的sessionTask到数组
-    sessionTask ? [[self allSessionTask] addObject:sessionTask] : nil;
+    } progress:progressBlock success:successBlock failure:failureBlock];
 }
 
 #pragma mark - 上传多个文件（传入的是：文件二进制数据）
@@ -465,27 +454,17 @@ static AFHTTPSessionManager *_sessionManager;
                       name:(NSString *)name
                   fileName:(NSString *)fileName
                   mimeType:(NSString *)mimeType
-                  progress:(nullable void(^)(NSProgress *progress))progress
-                   success:(nullable void(^)(id responseObject))success
-                   failure:(nullable void(^)(NSError *error))failure {
-    NSURLSessionTask *sessionTask = [_sessionManager POST:url parameters:params headers:headers constructingBodyWithBlock:^(id<AFMultipartFormData>  _Nonnull formData) {
+                  progress:(nullable void(^)(NSProgress *progress))progressBlock
+                   success:(nullable BRHttpSuccessBlock)successBlock
+                   failure:(nullable BRHttpFailureBlock)failureBlock {
+    [self uploadTaskWithUrl:url params:params headers:headers constructingBodyWithBlock:^(id<AFMultipartFormData> formData) {
+        // 在这个block中设置需要上传的文件
         // 使用循环同时上传多个文件
         [fileDatas enumerateObjectsUsingBlock:^(NSData * _Nonnull fileData, NSUInteger idx, BOOL * _Nonnull stop) {
             // 这个方法的作用是将指定的文件添加到表单数据中，以便在发送 HTTP 请求时一起发送给服务器。
             [formData appendPartWithFileData:fileData name:name fileName:fileName mimeType:mimeType];
         }];
-    } progress:^(NSProgress * _Nonnull uploadProgress) {
-        //上传进度
-        progress ? progress(uploadProgress) : nil;
-    } success:^(NSURLSessionDataTask * _Nonnull task, id _Nullable responseObject) {
-        [[self allSessionTask] removeObject:task];
-        success ? success(responseObject) : nil;
-    } failure:^(NSURLSessionDataTask * _Nullable task, NSError * _Nonnull error) {
-        [[self allSessionTask] removeObject:task];
-        failure ? failure(error) : nil;
-    }];
-    // 添加最新的sessionTask到数组
-    sessionTask ? [[self allSessionTask] addObject:sessionTask] : nil;
+    } progress:progressBlock success:successBlock failure:failureBlock];
 }
 
 #pragma mark - 上传文件（传入的是：本地文件路径，按文件原名称上传到服务器）
@@ -494,30 +473,19 @@ static AFHTTPSessionManager *_sessionManager;
                   headers:(nullable NSDictionary *)headers
                  filePath:(NSString *)filePath
                      name:(NSString *)name
-                 progress:(nullable void(^)(NSProgress *progress))progress
-                  success:(nullable void(^)(id responseObject))success
-                  failure:(nullable void(^)(NSError *error))failure {
-    NSURLSessionTask *sessionTask = [_sessionManager POST:url parameters:params headers:headers constructingBodyWithBlock:^(id<AFMultipartFormData>  _Nonnull formData) {
+                 progress:(nullable void(^)(NSProgress *progress))progressBlock
+                  success:(nullable BRHttpSuccessBlock)successBlock
+                  failure:(nullable BRHttpFailureBlock)failureBlock {
+    [self uploadTaskWithUrl:url params:params headers:headers constructingBodyWithBlock:^(id<AFMultipartFormData> formData) {
         // 在这个block中设置需要上传的文件
         NSError *error = nil;
         // 按文件原名称上传到服务器
         // 此方法省略了参数 fileName 和 mimeType，会根据'fileURL'的最后一个路径组件和'fileURL'扩展的系统关联MIME类型自动生成。
         [formData appendPartWithFileURL:[NSURL URLWithString:filePath] name:name error:&error];
         if (error) {
-            failure ? failure(error) : nil;
+            NSLog(@"error=%@", error);
         }
-    } progress:^(NSProgress * _Nonnull uploadProgress) {
-        //上传进度
-        progress ? progress(uploadProgress) : nil;
-    } success:^(NSURLSessionDataTask * _Nonnull task, id _Nullable responseObject) {
-        [[self allSessionTask] removeObject:task];
-        success ? success(responseObject) : nil;
-    } failure:^(NSURLSessionDataTask * _Nullable task, NSError * _Nonnull error) {
-        [[self allSessionTask] removeObject:task];
-        failure ? failure(error) : nil;
-    }];
-    // 添加最新的sessionTask到数组
-    sessionTask ? [[self allSessionTask] addObject:sessionTask] : nil;
+    } progress:progressBlock success:successBlock failure:failureBlock];
 }
 
 #pragma mark - 上传图片
@@ -526,10 +494,10 @@ static AFHTTPSessionManager *_sessionManager;
                    headers:(nullable NSDictionary *)headers
                      image:(UIImage *)image
                       name:(NSString *)name
-                  progress:(nullable void(^)(NSProgress *progress))progress
-                   success:(nullable void(^)(id responseObject))success
-                   failure:(nullable void(^)(NSError *error))failure {
-    NSURLSessionTask *sessionTask = [_sessionManager POST:url parameters:params headers:headers constructingBodyWithBlock:^(id<AFMultipartFormData>  _Nonnull formData) {
+                  progress:(nullable void(^)(NSProgress *progress))progressBlock
+                   success:(nullable BRHttpSuccessBlock)successBlock
+                   failure:(nullable BRHttpFailureBlock)failureBlock {
+    [self uploadTaskWithUrl:url params:params headers:headers constructingBodyWithBlock:^(id<AFMultipartFormData> formData) {
         // 在这个block中设置需要上传的文件
         
         // 将UIImage转换为JPEG格式的NSData（这里的1.0是质量参数）
@@ -542,18 +510,7 @@ static AFHTTPSessionManager *_sessionManager;
         NSString *imageName = [NSString stringWithFormat:@"pic_%@.jpg", timeStr];
         
         [formData appendPartWithFileData:imageData name:name fileName:imageName mimeType:@"image/jpg"];
-    } progress:^(NSProgress * _Nonnull uploadProgress) {
-        //上传进度
-        progress ? progress(uploadProgress) : nil;
-    } success:^(NSURLSessionDataTask * _Nonnull task, id _Nullable responseObject) {
-        [[self allSessionTask] removeObject:task];
-        success ? success(responseObject) : nil;
-    } failure:^(NSURLSessionDataTask * _Nullable task, NSError * _Nonnull error) {
-        [[self allSessionTask] removeObject:task];
-        failure ? failure(error) : nil;
-    }];
-    // 添加最新的sessionTask到数组
-    sessionTask ? [[self allSessionTask] addObject:sessionTask] : nil;
+    } progress:progressBlock success:successBlock failure:failureBlock];
 }
 
 #pragma mark - 上传多个图片
@@ -562,10 +519,11 @@ static AFHTTPSessionManager *_sessionManager;
                    headers:(nullable NSDictionary *)headers
                     images:(NSArray<UIImage *> *)images
                       name:(NSString *)name
-                  progress:(nullable void(^)(NSProgress *progress))progress
-                   success:(nullable void(^)(id responseObject))success
-                   failure:(nullable void(^)(NSError *error))failure {
-    NSURLSessionTask *sessionTask = [_sessionManager POST:url parameters:params headers:nil constructingBodyWithBlock:^(id<AFMultipartFormData>  _Nonnull formData) {
+                   progress:(nullable void(^)(NSProgress *progress))progressBlock
+                    success:(nullable BRHttpSuccessBlock)successBlock
+                    failure:(nullable BRHttpFailureBlock)failureBlock {
+    [self uploadTaskWithUrl:url params:params headers:headers constructingBodyWithBlock:^(id<AFMultipartFormData> formData) {
+        // 在这个block中设置需要上传的文件
         // 使用循环同时上传多个文件
         [images enumerateObjectsUsingBlock:^(UIImage * _Nonnull image, NSUInteger idx, BOOL * _Nonnull stop) {
             // 将UIImage转换为JPEG格式的NSData（这里的1.0是质量参数）
@@ -579,15 +537,59 @@ static AFHTTPSessionManager *_sessionManager;
             
             [formData appendPartWithFileData:imageData name:name fileName:imageName mimeType:@"image/jpg"];
         }];
-    } progress:^(NSProgress * _Nonnull uploadProgress) {
+    } progress:progressBlock success:successBlock failure:failureBlock];
+}
+
+#pragma mark - 上传任务
++ (void)uploadTaskWithUrl:(NSString *)url
+                   params:(nullable id)params
+                  headers:(nullable NSDictionary *)headers
+constructingBodyWithBlock:(nullable void (^)(id <AFMultipartFormData> formData))block
+                 progress:(nullable void(^)(NSProgress *progress))progressBlock
+                  success:(nullable BRHttpSuccessBlock)successBlock
+                  failure:(nullable BRHttpFailureBlock)failureBlock {
+    if (!(url && [url hasPrefix:@"http"]) && _baseUrl && _baseUrl.length > 0) {
+        // 获取完整的url路径
+        url = [NSString stringWithFormat:@"%@%@", _baseUrl, url];
+    }
+    if (_baseParameters.count > 0) {
+        NSMutableDictionary *mutableDic = [NSMutableDictionary dictionaryWithDictionary:params];
+        // 添加基本参数/公共参数
+        [mutableDic addEntriesFromDictionary:_baseParameters];
+        params = [mutableDic copy];
+    }
+    if (_isNeedEncry && _encodeParameters.count > 0) {
+        params = _encodeParameters;
+    }
+    // a multipart `POST` request
+    // constructingBodyWithBlock 参数说明：一个带有一个参数的块，用于向 HTTP Body 附加数据。该块参数是采用AFMultipartFormData协议的对象。
+    NSURLSessionTask *sessionTask = [_sessionManager POST:url parameters:params headers:headers constructingBodyWithBlock:block progress:^(NSProgress * _Nonnull uploadProgress) {
         //上传进度
-        progress ? progress(uploadProgress) : nil;
+        progressBlock ? progressBlock(uploadProgress) : nil;
     } success:^(NSURLSessionDataTask * _Nonnull task, id  _Nullable responseObject) {
+        BOOL isEmpty = (responseObject == nil || [responseObject isEqual:[NSNull null]] ||
+        [responseObject isEqual:@"null"] || [responseObject isEqual:@"(null)"] ||
+        ([responseObject respondsToSelector:@selector(length)] && [(NSData *)responseObject length] == 0) ||
+        ([responseObject respondsToSelector:@selector(count)] && [(NSArray *)responseObject count] == 0));
+    
+        // 响应序列化类型是HTTP时，请求结果输出的是二进制数据
+        if (!isEmpty && ![NSJSONSerialization isValidJSONObject:responseObject]) {
+            NSError *error = nil;
+            // 将二进制数据序列化成JSON数据
+            id obj = [NSJSONSerialization JSONObjectWithData:responseObject options:NSJSONReadingMutableContainers error:&error];
+            if (error) {
+                if (_isOpenLog) BRApiLog(@"二进制数据序列化成JSON数据失败：%@", error);
+            } else {
+                responseObject = obj;
+            }
+        }
+        if (_isOpenLog) BRApiLog(@"\nurl：%@\nheader：\n%@\nparams：\n%@\nsuccess：\n%@\n\n", url, headers, params, responseObject);
         [[self allSessionTask] removeObject:task];
-        success ? success(responseObject) : nil;
+        successBlock ? successBlock(task, responseObject) : nil;
     } failure:^(NSURLSessionDataTask * _Nullable task, NSError * _Nonnull error) {
+        if (_isOpenLog) BRApiLog(@"\nurl：%@\nheader：\n%@\nparams：\n%@\nfailure：\n%@\n\n", url, headers, params, error);
+        failureBlock ? failureBlock(task, error) : nil;
         [[self allSessionTask] removeObject:task];
-        failure ? failure(error) : nil;
     }];
     // 添加最新的sessionTask到数组
     sessionTask ? [[self allSessionTask] addObject:sessionTask] : nil;
@@ -701,3 +703,4 @@ static AFHTTPSessionManager *_sessionManager;
 
 @end
 #endif
+

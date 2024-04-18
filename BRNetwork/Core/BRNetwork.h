@@ -173,16 +173,16 @@ NS_ASSUME_NONNULL_BEGIN
  *
  *  @param url              请求地址
  *  @param cachePath        文件下载的缓存目录
- *  @param progress         下载进度的回调
- *  @param success          下载成功的回调
- *  @param failure          下载失败的回调
+ *  @param progressBlock    下载进度的回调
+ *  @param successBlock     下载成功的回调
+ *  @param failureBlock     下载失败的回调
  *
  */
 + (void)downloadFileWithUrl:(NSString *)url
                   cachePath:(NSString *)cachePath
-                   progress:(nullable void(^)(NSProgress *progress))progress
-                    success:(nullable void(^)(NSString *filePath))success
-                    failure:(nullable void(^)(NSError *error))failure;
+                   progress:(nullable void(^)(NSProgress *progress))progressBlock
+                    success:(nullable void(^)(NSString *filePath))successBlock
+                    failure:(nullable void(^)(NSError *error))failureBlock;
 
 /**
  *  上传文件（传入的是：文件二进制数据）
@@ -194,9 +194,9 @@ NS_ASSUME_NONNULL_BEGIN
  *  @param name             表单中文件数据的参数名（即文件数据对应的key，如：file，upload等），服务器端接收文件的参数名
  *  @param fileName         自定义上传到服务器的文件名称
  *  @param mimeType         上传文件的 MIME 类型。MIME 类型描述了文件的内容类型。例如：image/jpeg 或 image/png 等。
- *  @param progress         上传进度的回调
- *  @param success          请求成功的回调
- *  @param failure          请求失败的回调
+ *  @param progressBlock    上传进度的回调
+ *  @param successBlock     请求成功的回调
+ *  @param failureBlock     请求失败的回调
  *
  */
 + (void)uploadFileWithUrl:(NSString *)url
@@ -206,9 +206,9 @@ NS_ASSUME_NONNULL_BEGIN
                      name:(NSString *)name
                  fileName:(NSString *)fileName
                  mimeType:(NSString *)mimeType
-                 progress:(nullable void(^)(NSProgress *progress))progress
-                  success:(nullable void(^)(id responseObject))success
-                  failure:(nullable void(^)(NSError *error))failure;
+                 progress:(nullable void(^)(NSProgress *progress))progressBlock
+                  success:(nullable BRHttpSuccessBlock)successBlock
+                  failure:(nullable BRHttpFailureBlock)failureBlock;
 
 /**
  *  上传多个文件（传入的是：文件二进制数据）
@@ -220,9 +220,9 @@ NS_ASSUME_NONNULL_BEGIN
  *  @param name             表单中文件数据的参数名（即文件数据对应的key，如：file，upload等），服务器端接收文件的参数名
  *  @param fileName         自定义上传到服务器的文件名称
  *  @param mimeType         上传文件的 MIME 类型。MIME 类型描述了文件的内容类型。例如：image/jpeg 或 image/png 等。
- *  @param progress         上传进度的回调
- *  @param success          请求成功的回调
- *  @param failure          请求失败的回调
+ *  @param progressBlock    上传进度的回调
+ *  @param successBlock     请求成功的回调
+ *  @param failureBlock     请求失败的回调
  *
  */
 + (void)uploadFilesWithUrl:(NSString *)url
@@ -232,9 +232,9 @@ NS_ASSUME_NONNULL_BEGIN
                       name:(NSString *)name
                   fileName:(NSString *)fileName
                   mimeType:(NSString *)mimeType
-                  progress:(nullable void(^)(NSProgress *progress))progress
-                   success:(nullable void(^)(id responseObject))success
-                   failure:(nullable void(^)(NSError *error))failure;
+                  progress:(nullable void(^)(NSProgress *progress))progressBlock
+                   success:(nullable BRHttpSuccessBlock)successBlock
+                   failure:(nullable BRHttpFailureBlock)failureBlock;
 
 /**
  *  上传文件（传入的是：本地文件路径，按文件原名称上传到服务器）
@@ -244,9 +244,9 @@ NS_ASSUME_NONNULL_BEGIN
  *  @param headers          请求头
  *  @param filePath         文件本地沙盒路径
  *  @param name             表单中文件数据的参数名（即文件数据对应的key，如：file，upload等），服务器端接收文件的参数名
- *  @param progress         上传进度的回调
- *  @param success          请求成功的回调
- *  @param failure          请求失败的回调
+ *  @param progressBlock    上传进度的回调
+ *  @param successBlock     请求成功的回调
+ *  @param failureBlock     请求失败的回调
  *
  */
 + (void)uploadFileWithUrl:(NSString *)url
@@ -254,9 +254,9 @@ NS_ASSUME_NONNULL_BEGIN
                   headers:(nullable NSDictionary *)headers
                  filePath:(NSString *)filePath
                      name:(NSString *)name
-                 progress:(nullable void(^)(NSProgress *progress))progress
-                  success:(nullable void(^)(id responseObject))success
-                  failure:(nullable void(^)(NSError *error))failure;
+                 progress:(nullable void(^)(NSProgress *progress))progressBlock
+                  success:(nullable BRHttpSuccessBlock)successBlock
+                  failure:(nullable BRHttpFailureBlock)failureBlock;
 
 /**
  *  上传图片
@@ -266,9 +266,9 @@ NS_ASSUME_NONNULL_BEGIN
  *  @param headers          请求头
  *  @param image            图片对象
  *  @param name             表单中文件数据的参数名（即文件数据对应的key，如：file，upload等），服务器端接收文件的参数名
- *  @param progress         上传进度的回调
- *  @param success          请求成功的回调
- *  @param failure          请求失败的回调
+ *  @param progressBlock    上传进度的回调
+ *  @param successBlock     请求成功的回调
+ *  @param failureBlock     请求失败的回调
  *
  */
 + (void)uploadImageWithUrl:(NSString *)url
@@ -276,9 +276,9 @@ NS_ASSUME_NONNULL_BEGIN
                    headers:(nullable NSDictionary *)headers
                      image:(UIImage *)image
                       name:(NSString *)name
-                  progress:(nullable void(^)(NSProgress *progress))progress
-                   success:(nullable void(^)(id responseObject))success
-                   failure:(nullable void(^)(NSError *error))failure;
+                  progress:(nullable void(^)(NSProgress *progress))progressBlock
+                   success:(nullable BRHttpSuccessBlock)successBlock
+                   failure:(nullable BRHttpFailureBlock)failureBlock;
 
 /**
  *  上传多个图片
@@ -288,9 +288,9 @@ NS_ASSUME_NONNULL_BEGIN
  *  @param headers          请求头
  *  @param images           图片对象数组
  *  @param name             表单中文件数据的参数名（即文件数据对应的key，如：file，upload等），服务器端接收文件的参数名
- *  @param progress         上传进度的回调
- *  @param success          请求成功的回调
- *  @param failure          请求失败的回调
+ *  @param progressBlock    上传进度的回调
+ *  @param successBlock     请求成功的回调
+ *  @param failureBlock     请求失败的回调
  *
  */
 + (void)uploadImagesWithUrl:(NSString *)url
@@ -298,9 +298,9 @@ NS_ASSUME_NONNULL_BEGIN
                    headers:(nullable NSDictionary *)headers
                     images:(NSArray<UIImage *> *)images
                       name:(NSString *)name
-                  progress:(nullable void(^)(NSProgress *progress))progress
-                   success:(nullable void(^)(id responseObject))success
-                   failure:(nullable void(^)(NSError *error))failure;
+                   progress:(nullable void(^)(NSProgress *progress))progressBlock
+                    success:(nullable BRHttpSuccessBlock)successBlock
+                    failure:(nullable BRHttpFailureBlock)failureBlock;
 
 /** 取消所有Http请求 */
 + (void)cancelAllRequest;
