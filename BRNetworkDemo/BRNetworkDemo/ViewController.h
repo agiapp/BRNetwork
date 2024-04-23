@@ -2,8 +2,8 @@
 //  ViewController.h
 //  BRNetworkDemo
 //
-//  Created by 任波 on 2018/4/8.
-//  Copyright © 2018年 91renb. All rights reserved.
+//  Created by renbo on 2018/4/8.
+//  Copyright © 2018年 irenb. All rights reserved.
 //
 
 #import <UIKit/UIKit.h>
