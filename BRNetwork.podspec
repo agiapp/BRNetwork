@@ -14,6 +14,7 @@ Pod::Spec.new do |s|
   s.platform     = :ios, '9.0'    # 框架支持的平台和版本
   s.ios.deployment_target = '9.0' # 最低支持的target
   s.source       = { :git => "https://github.com/agiapp/BRNetwork.git", :tag => s.version.to_s }  # GitHib下载地址和版本
+  s.resource_bundles = { 'BRNetwork.Privacy' => 'BRNetwork/PrivacyInfo.xcprivacy' }  # 隐私清单
   s.requires_arc = true   # 框架要求ARC环境下使用
   
   s.default_subspec = 'Core'  # 默认集成的子模块（全部）
@@ -21,7 +22,6 @@ Pod::Spec.new do |s|
   # 二级目录（根目录是s，使用s.subspec设置子目录，这里设置子目录为ss）
   s.subspec 'Core' do |ss|
     ss.source_files = 'BRNetwork/Core/*.{h,m}'
-    ss.resource_bundles = {'BRNetwork.Privacy' => 'BRNetwork/PrivacyInfo.xcprivacy'}  # 隐私清单
     ss.dependency 'AFNetworking'
     ss.dependency 'BRNetwork/YYCache'
   end
