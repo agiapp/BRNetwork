@@ -14,17 +14,15 @@ PODS:
   - AFNetworking/Serialization (4.0.1)
   - AFNetworking/UIKit (4.0.1):
     - AFNetworking/NSURLSession
-  - BRNetwork/Cache (2.1.0):
-    - BRNetwork/Core
-    - YYCache_BR
-  - BRNetwork/Core (2.1.0):
+  - BRNetwork (2.1.0):
     - AFNetworking
+    - YYCache_BR
   - YTKNetwork (3.0.6):
     - AFNetworking/NSURLSession (~> 4.0)
-  - YYCache_BR (1.0.5)
+  - YYCache_BR (1.0.6)
 
 DEPENDENCIES:
-  - BRNetwork/Cache (from `../`)
+  - BRNetwork (from `../`)
   - YTKNetwork
 
 SPEC REPOS:
@@ -39,10 +37,10 @@ EXTERNAL SOURCES:
 
 SPEC CHECKSUMS:
   AFNetworking: 3bd23d814e976cd148d7d44c3ab78017b744cd58
-  BRNetwork: 01acb84a6b8b27f355af98e4d642703c1abaf39b
+  BRNetwork: 16534be22171ad6a54f178fdb7756711ad619354
   YTKNetwork: c16be90b06be003de9e9cd0d3b187cc8eaf35c04
-  YYCache_BR: df8c20d61b17ea1c5f00237b0f5fd56d03cdd803
+  YYCache_BR: 89a0e3d3222d27951522a37bb5121f8b786e328b
 
-PODFILE CHECKSUM: 4e7abb4acc2b7bf2497dfdbce15702adca511398
+PODFILE CHECKSUM: c5c80fbac335fe4c0c1556c301f8357a9cedd84b
 
 COCOAPODS: 1.16.2

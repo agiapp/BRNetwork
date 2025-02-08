@@ -17,19 +17,9 @@ Pod::Spec.new do |s|
   s.resource_bundles = { 'BRNetwork.Privacy' => 'BRNetwork/PrivacyInfo.xcprivacy' }  # 隐私清单
   s.requires_arc = true   # 框架要求ARC环境下使用
   
-  s.default_subspec = 'Core'
-  
   # 本地框架源文件的位置（包含所有文件）
-  # 二级目录（根目录是s，使用s.subspec设置子目录，这里设置子目录为ss）
-  s.subspec 'Core' do |ss|
-    ss.source_files  = "BRNetwork/*.{h,m}"
-    ss.dependency "AFNetworking"
-  end
-  
-  s.subspec 'Cache' do |ss|
-    ss.source_files = 'BRNetwork/Cache/*.{h,m}'
-    ss.dependency 'BRNetwork/Core'
-    ss.dependency 'YYCache_BR'
-  end
+  s.source_files  = "BRNetwork/*.{h,m}"
+  s.dependency "AFNetworking"
+  s.dependency 'YYCache_BR'
  
 end
