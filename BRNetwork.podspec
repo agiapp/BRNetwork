@@ -1,6 +1,6 @@
 Pod::Spec.new do |s|
   s.name         = "BRNetwork"  # 框架的名称
-  s.version      = "2.0.6"  # 框架的版本号
+  s.version      = "2.1.0"  # 框架的版本号
   s.summary      = "BRNetwork是一个基于AFNetworking和YYCache封装的轻量级网络请求工具" # 框架的简单介绍
   # 框架的详细描述(详细介绍，要比简介长)
   s.description  = <<-DESC
@@ -17,19 +17,19 @@ Pod::Spec.new do |s|
   s.resource_bundles = { 'BRNetwork.Privacy' => 'BRNetwork/PrivacyInfo.xcprivacy' }  # 隐私清单
   s.requires_arc = true   # 框架要求ARC环境下使用
   
-  s.default_subspec = 'Core'  # 默认集成的子模块（全部）
+  s.default_subspec = 'Core'
   
+  # 本地框架源文件的位置（包含所有文件）
   # 二级目录（根目录是s，使用s.subspec设置子目录，这里设置子目录为ss）
   s.subspec 'Core' do |ss|
-    ss.source_files = 'BRNetwork/Core/*.{h,m}'
-    ss.dependency 'AFNetworking'
-    ss.dependency 'BRNetwork/YYCache'
+    ss.source_files  = "BRNetwork/*.{h,m}"
+    ss.dependency "AFNetworking"
   end
   
-  s.subspec 'YYCache' do |ss|
-    ss.source_files = 'BRNetwork/YYCache/*.{h,m}'
-    ss.library = 'sqlite3'
-    ss.frameworks = 'UIKit', 'CoreFoundation', 'QuartzCore'
+  s.subspec 'Cache' do |ss|
+    ss.source_files = 'BRNetwork/Cache/*.{h,m}'
+    ss.dependency 'BRNetwork/Core'
+    ss.dependency 'YYCache_BR'
   end
  
 end

@@ -7,8 +7,8 @@
 //
 
 #import "BRCache.h"
-#if __has_include(<YYCache/YYCache.h>)
-#import <YYCache/YYCache.h>
+#if __has_include(<YYCache.h>)
+#import <YYCache.h>
 #else
 #import "YYCache.h"
 #endif
