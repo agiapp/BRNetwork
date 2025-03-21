@@ -15,7 +15,7 @@
 #import "YYDiskCache.h"
 
 static YYCache *_dataCache;
-static NSString *const httpCache = @"BRNetworkCache";
+static NSString *const httpCache = @"BRNetworkYYCache";
 static NSArray *_filtrationCacheKey;
 
 @implementation BRCache
