@@ -38,7 +38,7 @@
            }
     };
     NSDictionary *headers = @{
-        @"Authorization": @"Bearer sk-xxxx",
+        @"Authorization": @"Bearer sk-xxxxxxx",
         @"Content-Type": @"application/json",
         @"X-DashScope-SSE": @"enable"
     };

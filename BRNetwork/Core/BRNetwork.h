@@ -60,7 +60,6 @@ typedef void (^BRHttpFailureBlock)(NSURLSessionDataTask * _Nullable task, NSErro
 /** 网络状态Block */
 typedef void(^BRNetworkStatusBlock)(BRNetworkStatus status);
 
-
 NS_ASSUME_NONNULL_BEGIN
 
 @interface BRNetwork : NSObject

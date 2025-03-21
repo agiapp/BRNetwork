@@ -38,7 +38,7 @@ NSString *const kApiUrl = @"https://api.xxxx.com/app";
 #pragma mark - 设置请求头
 - (NSDictionary *)requestHeaderDictionaryWithParams:(id)params method:(BRRequestMethod)method {
     NSMutableDictionary *headerDic = [[NSMutableDictionary alloc]init];
-    [headerDic setObject:@"Bearer sk-5535095fa44248fa96ebc5e2778d8eff" forKey:@"Authorization"];
+    [headerDic setObject:@"Bearer sk-xxxxxx" forKey:@"Authorization"];
     [headerDic setObject:@"enable" forKey:@"X-DashScope-SSE"];
     [headerDic setObject:@"application/json" forKey:@"Content-Type"];
     
