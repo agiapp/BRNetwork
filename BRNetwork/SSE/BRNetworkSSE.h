@@ -50,7 +50,6 @@ NS_ASSUME_NONNULL_BEGIN
     onMessageBlock:(nullable BROnMessageBlock)onMessageBlock
       onErrorBlock:(nullable BROnErrorBlock)onErrorBlock;
 
-
 /**
  *  POST请求方法
  *

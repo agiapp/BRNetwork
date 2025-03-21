@@ -11,6 +11,7 @@
 @interface BRNetworkSSE ()<NSURLSessionDataDelegate>
 // 会话对象
 @property (nonatomic, strong) NSURLSession *session;
+// 加载数据任务
 @property (nonatomic, strong) NSURLSessionDataTask *dataTask;
 
 @end
@@ -156,7 +157,7 @@
     self.onErrorBlock ? self.onErrorBlock(error): nil;
 }
 
-#pragma mark - NSURLSessionDataDelegate methods
+#pragma mark - NSURLSessionDataDelegate
 // 1.接受到服务器返回数据的时候调用，可能被调用多次
 - (void)URLSession:(NSURLSession *)session dataTask:(NSURLSessionDataTask *)dataTask didReceiveData:(NSData *)data {
     NSString *dataString = [[NSString alloc] initWithData:data encoding:NSUTF8StringEncoding];
