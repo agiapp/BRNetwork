@@ -8,6 +8,13 @@
 
 #import "BRNetworkSSE.h"
 
+#ifdef __OBJC__
+
+// 日志输出宏定义
+#define BRApiLog(FORMAT, ...) fprintf(stderr, "%s:[第%d行]\t%s\n", [[[NSString stringWithUTF8String: __FILE__] lastPathComponent] UTF8String], __LINE__, [[NSString stringWithFormat: FORMAT, ## __VA_ARGS__] UTF8String]);
+
+#endif
+
 @interface BRNetworkSSE ()<NSURLSessionDataDelegate>
 // 会话对象
 @property (nonatomic, strong) NSURLSession *session;
@@ -90,6 +97,7 @@
             NSLog(@"JSON 序列化失败: %@", jsonError.localizedDescription);
         }
     }
+    BRApiLog(@"\n[%@]url：%@\nheader：\n%@\nparams：\n%@\n\n", self.method, self.url, self.headers, self.params);
     // 设置超时时间
     request.timeoutInterval = 20.0f;
     // 5.创建加载数据任务（处理网络请求，通过设置代理来接收数据）
@@ -161,7 +169,7 @@
 // 1.接受到服务器返回数据的时候调用，可能被调用多次
 - (void)URLSession:(NSURLSession *)session dataTask:(NSURLSessionDataTask *)dataTask didReceiveData:(NSData *)data {
     NSString *dataString = [[NSString alloc] initWithData:data encoding:NSUTF8StringEncoding];
-    NSLog(@"===收到SSE数据===\n%@", dataString);
+    BRApiLog(@"===收到SSE数据===\n%@", dataString);
     // 解析 SSE 数据格式
     [self onMessage:dataString];
 }
