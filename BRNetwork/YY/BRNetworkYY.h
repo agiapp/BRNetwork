@@ -83,7 +83,6 @@ NS_ASSUME_NONNULL_BEGIN
                   success:(nullable BRHttpSuccessBlock)successBlock
                   failure:(nullable BRHttpFailureBlock)failureBlock;
 
-
 @end
 
 NS_ASSUME_NONNULL_END

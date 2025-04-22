@@ -1,10 +1,10 @@
 Pod::Spec.new do |s|
   s.name         = "BRNetwork"  # 框架的名称
   s.version      = "2.2.0"  # 框架的版本号
-  s.summary      = "BRNetwork是一个基于AFNetworking和YYCache封装的轻量级网络请求工具" # 框架的简单介绍
+  s.summary      = "BRNetwork是一个iOS轻量级网络请求库，封装了网络请求、本地数据缓存与SSE流式通信" # 框架的简单介绍
   # 框架的详细描述(详细介绍，要比简介长)
   s.description  = <<-DESC
-                    BRNetwork是一个基于AFNetworking和YYCache封装的轻量级网络请求工具,支持本地数据缓存. Support the Objective - C language.
+  BRNetwork是一个基于AFNetworking封装的轻量级网络请求工具；BRNetworkYY是基于BRNetwork并二次封装YYCache，整合了数据缓存功能；BRNetworkSSE是一个基于SSE(Server-Sent Events)协议封装的网络请求类，专为AI大模型的流式数据响应设计，支持实时接收模型返回的数据流。
                 DESC
   s.homepage     = "https://github.com/agiapp/BRNetwork"  # 框架的主页
   s.license      = { :type => "MIT", :file => "LICENSE" } # 证书类型

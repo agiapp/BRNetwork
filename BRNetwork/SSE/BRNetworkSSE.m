@@ -36,38 +36,6 @@
 }
 
 #pragma mark - Public Method
-/// GET请求方法
-+ (void)getWithUrl:(NSString *)url
-            params:(nullable NSDictionary *)params
-           headers:(nullable NSDictionary *)headers
-    onMessageBlock:(BROnMessageBlock)onMessageBlock
-      onErrorBlock:(BROnErrorBlock)onErrorBlock {
-    BRNetworkSSE *req = [[BRNetworkSSE alloc] init];
-    req.url = url;
-    req.method = @"GET";
-    req.params = params;
-    req.headers = headers;
-    req.onMessageBlock = onMessageBlock;
-    req.onErrorBlock = onErrorBlock;
-    [req startRequest];
-}
-
-/// POST请求方法
-+ (void)postWithUrl:(NSString *)url
-             params:(nullable NSDictionary *)params
-            headers:(nullable NSDictionary *)headers
-     onMessageBlock:(BROnMessageBlock)onMessageBlock
-       onErrorBlock:(BROnErrorBlock)onErrorBlock {
-    BRNetworkSSE *req = [[BRNetworkSSE alloc] init];
-    req.url = url;
-    req.method = @"POST";
-    req.params = params;
-    req.headers = headers;
-    req.onMessageBlock = onMessageBlock;
-    req.onErrorBlock = onErrorBlock;
-    [req startRequest];
-}
-
 /// 开始请求
 - (void)startRequest {
     // GET请求（参数拼接到url后面）
@@ -116,10 +84,10 @@
 #pragma mark - Private Method
 /// 请求结果（执行多次，回调流式数据）
 - (void)onMessage:(NSString *)result {
-    // 解析SSE数据，例如
+    // 解析SSE数据，例如：
     /**
-     id:37
-     event:result
+     id:1
+     event:message
      :HTTP_STATUS/200
      data:{"output":{"session_id":"","finish_reason":"stop","text":"我是你的智能助手。"},"request_id":"c70c58a4-89cd-97d2-b29f-3d4b6385390d"}
      */

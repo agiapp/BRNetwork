@@ -17,7 +17,7 @@ NS_ASSUME_NONNULL_BEGIN
 @interface BRNetworkSSE : NSObject
 /** 请求地址 */
 @property (nonatomic, copy) NSString *url;
-/** 请求方法 */
+/** 请求方法（GET/POST） */
 @property (nonatomic, copy) NSString *method;
 /** 请求头 */
 @property (nullable, nonatomic, copy) NSDictionary *headers;
@@ -34,36 +34,6 @@ NS_ASSUME_NONNULL_BEGIN
 - (void)startRequest;
 /** 取消请求 */
 - (void)cancelRequest;
-
-/**
- *  GET请求方法
- *
- *  @param url 请求地址
- *  @param params 请求参数
- *  @param headers 请求头
- *  @param onMessageBlock 请求成功的回调
- *  @param onErrorBlock 请求失败的回调
- */
-+ (void)getWithUrl:(NSString *)url
-            params:(nullable NSDictionary *)params
-           headers:(nullable NSDictionary *)headers
-    onMessageBlock:(nullable BROnMessageBlock)onMessageBlock
-      onErrorBlock:(nullable BROnErrorBlock)onErrorBlock;
-
-/**
- *  POST请求方法
- *
- *  @param url 请求地址
- *  @param params 请求参数
- *  @param headers 请求头
- *  @param onMessageBlock 请求成功的回调
- *  @param onErrorBlock 请求失败的回调
- */
-+ (void)postWithUrl:(NSString *)url
-             params:(nullable NSDictionary *)params
-            headers:(nullable NSDictionary *)headers
-     onMessageBlock:(nullable BROnMessageBlock)onMessageBlock
-       onErrorBlock:(nullable BROnErrorBlock)onErrorBlock;
 
 @end
 

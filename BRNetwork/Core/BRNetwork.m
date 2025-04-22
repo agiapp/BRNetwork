@@ -147,7 +147,7 @@ static AFHTTPSessionManager *_sessionManager;
 #pragma mark - 设置请求超时时间(默认30s)
 + (void)setRequestTimeoutInterval:(NSTimeInterval)timeout {
     if (!_sessionManager) return;
-    
+
     _sessionManager.requestSerializer.timeoutInterval = timeout;
 }
 
