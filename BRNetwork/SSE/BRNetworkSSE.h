@@ -23,6 +23,8 @@ NS_ASSUME_NONNULL_BEGIN
 @property (nullable, nonatomic, copy) NSDictionary *headers;
 /** 请求参数（一般为字典类型）*/
 @property (nullable, nonatomic, strong) id params;
+/** 设置请求超时时间(默认20秒) */
+@property (nonatomic, assign) NSTimeInterval timeoutInterval;
 /** 请求结果的回调（执行多次，回调流式数据） */
 @property (nullable, nonatomic, copy) BROnMessageBlock onMessageBlock;
 /** 请求完成的回调 */

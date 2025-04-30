@@ -31,18 +31,22 @@
 
 #pragma mark - 快速发起 SSE 请求（基于 阿里云百炼平台 示例）
 - (void)startSSERequest {
-    NSString *url = @"https://dashscope.aliyuncs.com/api/v1/apps/0e4a1fd7d5dasdsadbbc94af41e18b7d7e/completion";
+    NSString *url = @"https://dashscope.aliyuncs.com/compatible-mode/v1/chat/completions";
     // 1. 构造请求参数
     NSDictionary *params = @{
-        @"input": @{
-               @"prompt": @"你是谁？"
-           }
+        @"model": @"qwen-plus",
+        @"messages": @[
+            @{
+                @"role": @"user",
+                @"content": @"你是谁？"
+            }
+        ],
+        @"stream": @YES
     };
     // 2. 构造请求头
     NSDictionary *headers = @{
-        @"Authorization": @"Bearer sk-xxxxxxx",
+        @"Authorization": @"Bearer sk-exxxxx",
         @"Content-Type": @"application/json",
-        @"X-DashScope-SSE": @"enable"
     };
     // 3. 创建并配置请求
     BRNetworkSSE *req = [[BRNetworkSSE alloc] init];
