@@ -384,8 +384,10 @@ typedef void(^BROnErrorBlock)(NSError * _Nonnull error);
 @property (nonatomic, copy) NSString *method;
 /** 请求头 */
 @property (nullable, nonatomic, copy) NSDictionary *headers;
-/** 请求参数（一般为字典类型）*/
+/** POST请求参数（提示：对于GET请求，需要将参数拼接到url后面） */
 @property (nullable, nonatomic, strong) id params;
+/** 设置请求超时时间(默认20秒) */
+@property (nonatomic, assign) NSTimeInterval timeoutInterval;
 /** 请求结果的回调（执行多次，回调流式数据） */
 @property (nullable, nonatomic, copy) BROnMessageBlock onMessageBlock;
 /** 请求完成的回调 */

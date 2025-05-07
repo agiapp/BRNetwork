@@ -1,6 +1,6 @@
 Pod::Spec.new do |s|
   s.name         = "BRNetwork"  # 框架的名称
-  s.version      = "2.2.0"  # 框架的版本号
+  s.version      = "2.3.0"  # 框架的版本号
   s.summary      = "BRNetwork是一个iOS轻量级网络请求库，封装了网络请求、本地数据缓存与SSE流式通信" # 框架的简单介绍
   # 框架的详细描述(详细介绍，要比简介长)
   s.description  = <<-DESC

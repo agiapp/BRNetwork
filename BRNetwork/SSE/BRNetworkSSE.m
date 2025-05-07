@@ -7,7 +7,6 @@
 //
 
 #import "BRNetworkSSE.h"
-#import "NSString+BRNetworkSSE.h"
 
 #ifdef __OBJC__
 
@@ -51,9 +50,6 @@
 - (void)startRequest {
     // 对于GET请求，将参数拼接到URL后面
     NSString *requestUrl = self.url;
-    if (self.params && [self.method isEqualToString:@"GET"]) {
-        requestUrl = [NSString getURLQueryString:self.url params:self.params];
-    }
     // 1.创建请求URL
     NSURL *requestURL = [NSURL URLWithString:requestUrl];
     if (!requestURL) {
