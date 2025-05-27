@@ -143,6 +143,16 @@
     NSString *event = nil;
     NSMutableString *dataContent = [NSMutableString string];
     
+    // 是否有data:数据行
+    BOOL hasData = NO;
+    // 遍历所有行确定是否有data:行
+    for (NSString *line in lines) {
+        if ([line hasPrefix:@"data:"]) {
+            hasData = YES;
+            break;
+        }
+    }
+    
     // 逐行解析消息内容
     for (NSString *line in lines) {
         if ([line hasPrefix:@"event:"]) {
@@ -155,7 +165,7 @@
                 [dataContent appendString:@"\n"];  // 多行data字段间的换行
             }
             [dataContent appendString:dataLine];
-        } else if (line.length > 0 && ![line hasPrefix:@":"]) {
+        } else if (line.length > 0 && !hasData) {
             // 非标准数据行(不带前缀的纯数据)
             [dataContent appendFormat:@"%@\n", [line stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceCharacterSet]]];
         }
