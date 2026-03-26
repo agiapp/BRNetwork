@@ -104,7 +104,10 @@
                     successBlock ? successBlock(task, responseObject) : nil;
                 }
             } failure:^(NSURLSessionDataTask *task, NSError *error) {
-                failureBlock ? failureBlock(task, error) : nil;
+                // 如果本地不存在缓存，才执行网络请求失败的回调
+                if (!object) {
+                    failureBlock ? failureBlock(task, error) : nil;
+                }
             }];
         }];
     } else if (cachePolicy == BRCachePolicyCacheThenNetwork) {

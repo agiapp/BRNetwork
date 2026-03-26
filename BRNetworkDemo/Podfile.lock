@@ -14,15 +14,15 @@ PODS:
   - AFNetworking/Serialization (4.0.1)
   - AFNetworking/UIKit (4.0.1):
     - AFNetworking/NSURLSession
-  - BRNetwork (2.3.0):
-    - BRNetwork/Default (= 2.3.0)
-  - BRNetwork/Core (2.3.0):
+  - BRNetwork (2.3.2):
+    - BRNetwork/Default (= 2.3.2)
+  - BRNetwork/Core (2.3.2):
     - AFNetworking
-  - BRNetwork/Default (2.3.0):
+  - BRNetwork/Default (2.3.2):
     - BRNetwork/SSE
     - BRNetwork/YY
-  - BRNetwork/SSE (2.3.0)
-  - BRNetwork/YY (2.3.0):
+  - BRNetwork/SSE (2.3.2)
+  - BRNetwork/YY (2.3.2):
     - BRNetwork/Core
     - YYCache_BR
   - YYCache_BR (1.0.6)
@@ -41,7 +41,7 @@ EXTERNAL SOURCES:
 
 SPEC CHECKSUMS:
   AFNetworking: 3bd23d814e976cd148d7d44c3ab78017b744cd58
-  BRNetwork: 33ec57469d740d46cff3e614c312353bdee754a9
+  BRNetwork: eeb31aec570b06e561406899c181e75ae47fab4f
   YYCache_BR: 89a0e3d3222d27951522a37bb5121f8b786e328b
 
 PODFILE CHECKSUM: c63a80a2fdf6f24a84370ed2f708dbd4959798d5

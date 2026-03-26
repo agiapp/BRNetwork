@@ -1,6 +1,6 @@
 Pod::Spec.new do |s|
   s.name         = "BRNetwork"  # 框架的名称
-  s.version      = "2.3.1"  # 框架的版本号
+  s.version      = "2.3.2"  # 框架的版本号
   s.summary      = "BRNetwork是一个iOS轻量级网络请求库，封装了网络请求、本地数据缓存与SSE流式通信" # 框架的简单介绍
   # 框架的详细描述(详细介绍，要比简介长)
   s.description  = <<-DESC
@@ -11,8 +11,8 @@ Pod::Spec.new do |s|
   s.author       = { "renbo" => "developer@irenb.com" }  # 作者
   s.social_media_url = 'https://www.irenb.com'  # 社交网址
   
-  s.platform     = :ios, '9.0'    # 框架支持的平台和版本
-  s.ios.deployment_target = '9.0' # 最低支持的target
+  s.platform     = :ios, '11.0'    # 框架支持的平台和版本
+  s.ios.deployment_target = '11.0' # 最低支持的target
   s.source       = { :git => "https://github.com/agiapp/BRNetwork.git", :tag => s.version.to_s }  # GitHib下载地址和版本
   s.resource_bundles = { 'BRNetwork.Privacy' => 'BRNetwork/PrivacyInfo.xcprivacy' }  # 隐私清单
   s.requires_arc = true   # 框架要求ARC环境下使用
@@ -28,7 +28,7 @@ Pod::Spec.new do |s|
   
   s.subspec 'Core' do |ss|
     ss.source_files = 'BRNetwork/Core/*.{h,m}'
-    ss.dependency "AFNetworking"
+    ss.dependency "AFNetworking_BR"
   end
   
   s.subspec 'YY' do |ss|
