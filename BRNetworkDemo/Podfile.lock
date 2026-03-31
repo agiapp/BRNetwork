@@ -1,23 +1,23 @@
 PODS:
-  - AFNetworking (4.0.1):
-    - AFNetworking/NSURLSession (= 4.0.1)
-    - AFNetworking/Reachability (= 4.0.1)
-    - AFNetworking/Security (= 4.0.1)
-    - AFNetworking/Serialization (= 4.0.1)
-    - AFNetworking/UIKit (= 4.0.1)
-  - AFNetworking/NSURLSession (4.0.1):
-    - AFNetworking/Reachability
-    - AFNetworking/Security
-    - AFNetworking/Serialization
-  - AFNetworking/Reachability (4.0.1)
-  - AFNetworking/Security (4.0.1)
-  - AFNetworking/Serialization (4.0.1)
-  - AFNetworking/UIKit (4.0.1):
-    - AFNetworking/NSURLSession
+  - AFNetworking_BR (4.0.2):
+    - AFNetworking_BR/NSURLSession (= 4.0.2)
+    - AFNetworking_BR/Reachability (= 4.0.2)
+    - AFNetworking_BR/Security (= 4.0.2)
+    - AFNetworking_BR/Serialization (= 4.0.2)
+    - AFNetworking_BR/UIKit (= 4.0.2)
+  - AFNetworking_BR/NSURLSession (4.0.2):
+    - AFNetworking_BR/Reachability
+    - AFNetworking_BR/Security
+    - AFNetworking_BR/Serialization
+  - AFNetworking_BR/Reachability (4.0.2)
+  - AFNetworking_BR/Security (4.0.2)
+  - AFNetworking_BR/Serialization (4.0.2)
+  - AFNetworking_BR/UIKit (4.0.2):
+    - AFNetworking_BR/NSURLSession
   - BRNetwork (2.3.2):
     - BRNetwork/Default (= 2.3.2)
   - BRNetwork/Core (2.3.2):
-    - AFNetworking
+    - AFNetworking_BR
   - BRNetwork/Default (2.3.2):
     - BRNetwork/SSE
     - BRNetwork/YY
@@ -32,7 +32,7 @@ DEPENDENCIES:
 
 SPEC REPOS:
   https://mirrors.tuna.tsinghua.edu.cn/git/CocoaPods/Specs.git:
-    - AFNetworking
+    - AFNetworking_BR
     - YYCache_BR
 
 EXTERNAL SOURCES:
@@ -40,8 +40,8 @@ EXTERNAL SOURCES:
     :path: "../"
 
 SPEC CHECKSUMS:
-  AFNetworking: 3bd23d814e976cd148d7d44c3ab78017b744cd58
-  BRNetwork: eeb31aec570b06e561406899c181e75ae47fab4f
+  AFNetworking_BR: 3eee6a51beeaf76be9b1250ad5535a717df802a7
+  BRNetwork: d2e397bb0aa73533cdca1a38bc093cd45b894ee5
   YYCache_BR: 89a0e3d3222d27951522a37bb5121f8b786e328b
 
 PODFILE CHECKSUM: c63a80a2fdf6f24a84370ed2f708dbd4959798d5

@@ -7,7 +7,7 @@
 //
 
 #import "BRBaseRequest.h"
-#import <AFNetworking/AFNetworking.h>
+#import <AFNetworking.h>
 
 // 接口基本地址
 NSString *const kApiUrl = @"https://api.xxxx.com/app";
