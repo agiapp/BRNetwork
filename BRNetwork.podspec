@@ -11,8 +11,8 @@ Pod::Spec.new do |s|
   s.author       = { "renbo" => "developer@irenb.com" }  # 作者
   s.social_media_url = 'https://www.irenb.com'  # 社交网址
   
-  s.platform     = :ios, '11.0'    # 框架支持的平台和版本
-  s.ios.deployment_target = '11.0' # 最低支持的target
+  s.platform     = :ios, '12.0'    # 框架支持的平台和版本
+  s.ios.deployment_target = '12.0' # 最低支持的target
   s.source       = { :git => "https://github.com/agiapp/BRNetwork.git", :tag => s.version.to_s }  # GitHib下载地址和版本
   s.resource_bundles = { 'BRNetwork.Privacy' => 'BRNetwork/PrivacyInfo.xcprivacy' }  # 隐私清单
   s.requires_arc = true   # 框架要求ARC环境下使用
